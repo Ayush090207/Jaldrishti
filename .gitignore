@@ -1,0 +1,13 @@
+venv/
+__pycache__/
+*.log
+.orchids/
+.gemini/
+brain/
+*.pyc
+*.pyo
+*.pyd
+.DS_Store
+Thumbs.db
+.vercel
+.env*.local
