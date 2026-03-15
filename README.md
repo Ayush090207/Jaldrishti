@@ -44,19 +44,79 @@ A MISSION-LINKED heuristic engine for resource distribution:
 
 ---
 
-## 📂 System Architecture
+## 📂 Project Structure
 
 ```bash
-jaldrishti/
-├── dashboard/              # Mission Control Frontend
-│   ├── index.html          # Entry Point & HUD Layout
-│   ├── js/                 # Core Intelligence (pathfinding, optimization)
-│   ├── css/                # Professional Mission Control Styling
-│   └── data/               # Spatial GeoJSON & Hydrological Data
-├── src/                    # Backend Intelligence Core
-│   ├── resource_allocator.py # Heuristic Allocation Logic
-│   └── rescue_path.py      # Pathfinding Algorithms
-└── vercel.json             # Deployment Configuration
+JALDHRISHTI_V.2/
+│
+├── dashboard/                          # 🖥️  Mission Control Frontend
+│   ├── index.html                      # Main dashboard (map, controls, charts)
+│   ├── methodology.html                # Interactive methodology documentation
+│   ├── drone-intelligence.html         # Drone/aerial intelligence page
+│   ├── user-guide.html                 # Operator's user guide
+│   ├── js/
+│   │   ├── enhanced.js                 # ⭐ Core intelligence engine (4700 LOC)
+│   │   └── future-expansion.js         # Drone page logic
+│   ├── css/
+│   │   ├── styles.css                  # HUD/Glassmorphism styling
+│   │   └── future-expansion.css        # Drone page styling
+│   ├── assets/graphs/                  # Static chart images
+│   └── data/                           # 📊 Spatial & Hydrological Data
+│       ├── raw/
+│       │   ├── boundaries/             # Village boundary GeoJSON (3 files)
+│       │   ├── buildings/              # Building footprints GeoJSON (3 files)
+│       │   └── infrastructure/         # Safe havens & rescue centers
+│       └── processed/
+│           ├── risk_zones_sample.geojson
+│           ├── population_clusters.json
+│           └── elevation_profile.json
+│
+├── src/                                # 🐍 Backend Intelligence Core
+│   ├── config.py                       # Central configuration
+│   ├── flood_model.py                  # Multi-criteria flood simulation
+│   ├── terrain_analyzer.py             # DEM processing & terrain classification
+│   ├── resource_allocator.py           # Heuristic resource distribution
+│   ├── rescue_path.py                  # Pathfinding algorithms
+│   ├── data_ingestion.py               # GeoJSON/CSV ETL pipeline
+│   ├── api_server.py                   # FastAPI REST API
+│   └── utils.py                        # Shared utility functions
+│
+├── tests/                              # 🧪 Test Suite
+│   ├── conftest.py                     # Pytest fixtures
+│   ├── test_flood_model.py
+│   ├── test_terrain_analyzer.py
+│   ├── test_resource_allocator.py
+│   └── test_rescue_path.py
+│
+├── scripts/                            # 🔧 Data Processing Scripts
+│   ├── preprocess_dem.py               # DEM terrain preprocessing
+│   ├── generate_risk_zones.py          # Risk zone GeoJSON generator
+│   └── export_report.py               # Tactical report exporter
+│
+├── config/                             # ⚙️  Configuration
+│   ├── default.yaml                    # Default app settings
+│   └── villages.yaml                   # Village terrain definitions
+│
+├── docs/                               # 📄 Documentation
+│   ├── API_REFERENCE.md
+│   ├── ARCHITECTURE.md
+│   └── DEPLOYMENT_GUIDE.md
+│
+├── notebooks/                          # 📓 Jupyter Notebooks
+│   └── README.md
+│
+├── requirements.txt                    # Python dependencies
+├── package.json                        # NPM scripts
+├── setup.py                            # Python package setup
+├── Makefile                            # Dev/test/lint shortcuts
+├── vercel.json                         # Vercel deployment config
+├── .github/workflows/ci.yml           # CI/CD pipeline
+├── .env.example                        # Environment template
+├── technical_documentation.md          # Algorithm deep-dive
+├── CONTRIBUTING.md
+├── CHANGELOG.md
+├── LICENSE                             # MIT
+└── README.md
 ```
 
 ---

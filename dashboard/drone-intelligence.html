@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drone Intelligence — Jal Drishti</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #0f172a; --bg-surface: #1e293b; --bg-elevated: #334155;
+            --border-subtle: rgba(148,163,184,0.15); --border-accent: rgba(14,165,165,0.4);
+            --accent-primary: #0d9488; --accent-secondary: #14b8a6; --accent-glow: rgba(20,184,166,0.15);
+            --text-primary: #f1f5f9; --text-secondary: #cbd5e1; --text-muted: #94a3b8;
+            --success: #22c55e; --warning: #f59e0b; --danger: #ef4444; --info: #0ea5e9;
+            --font-main: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--font-main); background: var(--bg-base); min-height: 100vh; color: var(--text-primary); line-height: 1.7; }
+        .navbar { background: var(--bg-surface); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 60px; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border-subtle); }
+        .nav-brand { display: flex; align-items: center; gap: 0.5rem; color: var(--text-primary); text-decoration: none; font-weight: 600; font-size: 1.125rem; }
+        .nav-brand span { color: var(--accent-secondary); }
+        .nav-links { display: flex; gap: 0.25rem; }
+        .nav-link { color: var(--text-muted); text-decoration: none; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.875rem; font-weight: 500; transition: all 0.2s ease; }
+        .nav-link:hover { background: var(--bg-elevated); color: var(--text-primary); }
+        .nav-link.active { background: var(--accent-glow); color: var(--accent-secondary); }
+        .container { max-width: 900px; margin: 0 auto; padding: 2.5rem 1.5rem; }
+        .page-header { margin-bottom: 2.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border-subtle); }
+        .page-header h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .page-header p { color: var(--text-muted); font-size: 1rem; }
+        .section { margin-bottom: 2.5rem; }
+        .section-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .section-title::before { content: ""; width: 4px; height: 1.25rem; background: var(--accent-primary); border-radius: 2px; }
+        .card { background: var(--bg-surface); border-radius: 10px; padding: 1.5rem; margin-bottom: 1rem; border: 1px solid var(--border-subtle); }
+        .card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem; color: var(--accent-secondary); }
+        .card p { color: var(--text-secondary); margin-bottom: 0.75rem; }
+        .card p:last-child { margin-bottom: 0; }
+        .alert { padding: 1rem 1.25rem; border-radius: 8px; margin: 1rem 0; border-left: 3px solid; }
+        .alert.info { background: rgba(14,165,233,0.1); border-color: var(--info); }
+        .alert.success { background: rgba(34,197,94,0.1); border-color: var(--success); }
+        .alert.warning { background: rgba(245,158,11,0.1); border-color: var(--warning); }
+        .alert.danger { background: rgba(239,68,68,0.1); border-color: var(--danger); }
+        .alert strong { display: block; margin-bottom: 0.25rem; color: var(--text-primary); }
+        .alert p, .alert li { color: var(--text-secondary); font-size: 0.9rem; }
+        .data-table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.875rem; }
+        .data-table th, .data-table td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid var(--border-subtle); }
+        .data-table th { background: var(--bg-elevated); font-weight: 600; color: var(--text-primary); }
+        .data-table td { color: var(--text-secondary); }
+        .data-table tbody tr:hover td { background: rgba(255,255,255,0.02); }
+        .formula { background: var(--bg-base); color: var(--accent-secondary); padding: 1rem 1.25rem; border-radius: 6px; font-family: 'SF Mono','Monaco','Consolas',monospace; font-size: 0.875rem; margin: 1rem 0; border: 1px solid var(--border-subtle); overflow-x: auto; }
+        .formula .comment { color: var(--text-muted); font-size: 0.8rem; margin-top: 0.5rem; }
+        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin: 1rem 0; }
+        .data-box { background: var(--bg-base); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-subtle); }
+        .data-box h4 { font-size: 0.875rem; color: var(--accent-secondary); margin-bottom: 0.75rem; font-weight: 600; }
+        .data-row { display: flex; justify-content: space-between; font-size: 0.8125rem; padding: 0.35rem 0; border-bottom: 1px solid var(--border-subtle); }
+        .data-row:last-child { border-bottom: none; }
+        .data-row .label { color: var(--text-muted); }
+        .data-row .value { font-weight: 500; color: var(--text-primary); }
+        .pipeline { list-style: none; counter-reset: step; }
+        .pipeline li { counter-increment: step; padding: 0.75rem 0 0.75rem 3rem; position: relative; border-left: 2px solid var(--border-subtle); margin-left: 1rem; color: var(--text-secondary); }
+        .pipeline li:last-child { border-left: 2px solid transparent; }
+        .pipeline li::before { content: counter(step); position: absolute; left: -1rem; top: 0.75rem; width: 28px; height: 28px; background: var(--accent-primary); color: white; border-radius: 50%; font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; justify-content: center; }
+        .pipeline li strong { color: var(--text-primary); }
+        .weight-item { display: flex; align-items: center; gap: 1rem; margin: 0.75rem 0; }
+        .weight-label { flex: 0 0 150px; font-size: 0.875rem; color: var(--text-secondary); }
+        .weight-bar-container { flex: 1; height: 8px; background: var(--bg-base); border-radius: 4px; overflow: hidden; }
+        .weight-bar { height: 100%; background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary)); border-radius: 4px; }
+        .weight-value { flex: 0 0 50px; text-align: right; font-size: 0.875rem; font-weight: 600; color: var(--accent-secondary); }
+        .risk-levels { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem; margin: 1rem 0; }
+        .risk-level { padding: 1rem; border-radius: 8px; border-left: 4px solid; }
+        .risk-level.phase1 { background: rgba(14,165,233,0.1); border-color: #0ea5e9; }
+        .risk-level.phase2 { background: rgba(34,197,94,0.1); border-color: #22c55e; }
+        .risk-level.phase3 { background: rgba(139,92,246,0.1); border-color: #8b5cf6; }
+        .risk-level.phase4 { background: rgba(245,158,11,0.1); border-color: #f59e0b; }
+        .risk-level.phase5 { background: rgba(239,68,68,0.1); border-color: #ef4444; }
+        .risk-level h4 { font-size: 0.875rem; margin-bottom: 0.25rem; }
+        .risk-level p { font-size: 0.8rem; color: var(--text-muted); margin: 0; }
+        /* SVG Diagram Styles */
+        .diagram-container { margin: 1.5rem 0; text-align: center; }
+        .diagram-container svg { max-width: 100%; }
+        .diagram-caption { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1rem 0; }
+        .spec-box { background: var(--bg-base); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-subtle); }
+        .spec-box h4 { font-size: 0.8rem; color: var(--accent-secondary); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .footer { text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.75rem; border-top: 1px solid var(--border-subtle); margin-top: 2rem; }
+        @media (max-width: 768px) { .grid-3 { grid-template-columns: 1fr; } .navbar { padding: 0 1rem; } .nav-links { display: none; } .container { padding: 1.5rem 1rem; } }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html" class="nav-brand">Jal Drishti <span>2.0</span></a>
+        <div class="nav-links">
+            <a href="index.html" class="nav-link">Dashboard</a>
+            <a href="user-guide.html" class="nav-link">User Guide</a>
+            <a href="methodology.html" class="nav-link">Methodology</a>
+            <a href="drone-intelligence.html" class="nav-link active">Drone Intelligence</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>Drone Intelligence: Augmented Flood Monitoring</h1>
+            <p>Technical roadmap for evolving Jal Drishti from satellite-based analysis to real-time drone-powered flood monitoring with autonomous feature extraction</p>
+        </div>
+
+        <!-- 1. Vision Overview -->
+        <div class="section">
+            <h2 class="section-title">Vision & Motivation</h2>
+            <div class="card">
+                <p>Jal Drishti currently relies on <strong>satellite-derived data</strong> (Copernicus GLO-30 DEM at 30m resolution, Open-Meteo weather, CHIRPS rainfall archives) for flood risk modeling. While effective for regional-scale analysis, this approach has inherent limitations in <strong>temporal resolution</strong> (6–24hr update cycles), <strong>spatial resolution</strong> (30m DEM, ~5km rainfall grids), and <strong>cloud cover interference</strong>.</p>
+                <p>The <strong>Drone Intelligence</strong> initiative introduces <strong>autonomous survey drones</strong> as a complementary data layer — providing real-time, sub-centimeter ground truth during active flood events. This creates a <strong>satellite + drone fusion architecture</strong> that combines broad regional coverage with pinpoint local accuracy.</p>
+                <div class="alert success">
+                    <strong>Key Objective:</strong>
+                    <p>Achieve <strong>5cm Ground Sampling Distance</strong> with <strong>&lt;5 minute data latency</strong>, enabling real-time flood depth measurement, damage assessment, and rescue coordination during active events.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Current vs Future Comparison -->
+        <div class="section">
+            <h2 class="section-title">Current vs Future: Data Acquisition Comparison</h2>
+            <div class="card">
+                <table class="data-table">
+                    <thead>
+                        <tr><th>Parameter</th><th>Current (Satellite)</th><th>Future (Drone + Satellite)</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>DEM Resolution</strong></td><td>30m (Copernicus GLO-30)</td><td>5cm (LiDAR point cloud)</td></tr>
+                        <tr><td><strong>Rainfall Data</strong></td><td>~5km grid (CHIRPS/Open-Meteo)</td><td>On-site rain gauge + regional satellite</td></tr>
+                        <tr><td><strong>Update Frequency</strong></td><td>6–24 hours</td><td>Real-time (&lt;5 min)</td></tr>
+                        <tr><td><strong>Cloud Interference</strong></td><td>Yes (optical satellite blocked)</td><td>No (drone flies below clouds, LiDAR)</td></tr>
+                        <tr><td><strong>Flood Depth</strong></td><td>Simulated (SCS model)</td><td>Directly measured (LiDAR + pre-flood DEM)</td></tr>
+                        <tr><td><strong>Damage Assessment</strong></td><td>Not available</td><td>YOLOv8 object detection (structures, people, vehicles)</td></tr>
+                        <tr><td><strong>Coverage Area</strong></td><td>Regional (~50km²)</td><td>Targeted high-risk zones (~5km² per sortie)</td></tr>
+                        <tr><td><strong>Water Body Detection</strong></td><td>NDWI from limited bands</td><td>Multi-sensor: RGB + NDWI + Thermal + LiDAR</td></tr>
+                        <tr><td><strong>Processing</strong></td><td>Cloud server (LSTM/XGBoost)</td><td>Edge AI (Jetson Orin NX) + cloud hybrid</td></tr>
+                    </tbody>
+                </table>
+                <div class="alert info">
+                    <strong>Complementary Architecture:</strong>
+                    <p>Satellites provide <em>always-on regional monitoring</em>, while drones provide <em>on-demand tactical intelligence</em> for active flood events. The drone does not replace the satellite — it augments it.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. System Architecture Diagram -->
+        <div class="section">
+            <h2 class="section-title">Integrated System Architecture</h2>
+            <div class="card">
+                <h3>Data Flow: Drone → Backend → Dashboard</h3>
+                <p>The following diagram shows how drone-acquired data flows through the processing pipeline and integrates with the existing Jal Drishti dashboard:</p>
+                <div class="diagram-container">
+                    <svg viewBox="0 0 800 520" xmlns="http://www.w3.org/2000/svg" style="font-family: Inter, sans-serif;">
+                        <!-- Background -->
+                        <defs>
+                            <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0ea5e9" stop-opacity="0.2"/><stop offset="100%" stop-color="#0ea5e9" stop-opacity="0.05"/></linearGradient>
+                            <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.2"/><stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.05"/></linearGradient>
+                            <linearGradient id="g3" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#14b8a6" stop-opacity="0.2"/><stop offset="100%" stop-color="#14b8a6" stop-opacity="0.05"/></linearGradient>
+                            <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#94a3b8"/></marker>
+                        </defs>
+                        <!-- Layer 1: Drone -->
+                        <rect x="20" y="10" width="760" height="130" rx="8" fill="url(#g1)" stroke="#0ea5e9" stroke-opacity="0.3"/>
+                        <text x="40" y="35" fill="#0ea5e9" font-size="11" font-weight="600" letter-spacing="2">DRONE EDGE LAYER</text>
+                        <rect x="40" y="50" width="150" height="70" rx="6" fill="#1e293b" stroke="#334155"/><text x="115" y="75" fill="#f1f5f9" font-size="11" font-weight="600" text-anchor="middle">RGB + LiDAR</text><text x="115" y="95" fill="#94a3b8" font-size="9" text-anchor="middle">Sony A7C + Livox</text><text x="115" y="108" fill="#94a3b8" font-size="9" text-anchor="middle">Mid-360</text>
+                        <rect x="220" y="50" width="150" height="70" rx="6" fill="#1e293b" stroke="#334155"/><text x="295" y="75" fill="#f1f5f9" font-size="11" font-weight="600" text-anchor="middle">Edge AI</text><text x="295" y="95" fill="#94a3b8" font-size="9" text-anchor="middle">Jetson Orin NX</text><text x="295" y="108" fill="#94a3b8" font-size="9" text-anchor="middle">YOLOv8 + SAM</text>
+                        <rect x="400" y="50" width="150" height="70" rx="6" fill="#1e293b" stroke="#334155"/><text x="475" y="75" fill="#f1f5f9" font-size="11" font-weight="600" text-anchor="middle">Flight Controller</text><text x="475" y="95" fill="#94a3b8" font-size="9" text-anchor="middle">Pixhawk 6X</text><text x="475" y="108" fill="#94a3b8" font-size="9" text-anchor="middle">ArduPilot + RTK GPS</text>
+                        <rect x="580" y="50" width="180" height="70" rx="6" fill="#1e293b" stroke="#334155"/><text x="670" y="75" fill="#f1f5f9" font-size="11" font-weight="600" text-anchor="middle">Data Link</text><text x="670" y="95" fill="#94a3b8" font-size="9" text-anchor="middle">RFD900x + 4G/LTE</text><text x="670" y="108" fill="#94a3b8" font-size="9" text-anchor="middle">40km range</text>
+                        <!-- Arrows L1 -->
+                        <line x1="190" y1="85" x2="218" y2="85" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+                        <line x1="370" y1="85" x2="398" y2="85" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+                        <line x1="550" y1="85" x2="578" y2="85" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+                        <!-- Arrow Down -->
+                        <line x1="400" y1="140" x2="400" y2="170" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)" stroke-dasharray="4"/>
+                        <text x="415" y="160" fill="#94a3b8" font-size="9">WebSocket / 4G</text>
+                        <!-- Layer 2: Backend -->
+                        <rect x="20" y="175" width="760" height="130" rx="8" fill="url(#g2)" stroke="#8b5cf6" stroke-opacity="0.3"/>
+                        <text x="40" y="200" fill="#8b5cf6" font-size="11" font-weight="600" letter-spacing="2">BACKEND PROCESSING LAYER (NEW)</text>
+                        <rect x="40" y="215" width="160" height="70" rx="6" fill="#1e293b" stroke="#334155"/><text x="120" y="240" fill="#f1f5f9" font-size="11" font-weight="600" text-anchor="middle">drone_ingest.py</text><text x="120" y="258" fill="#94a3b8" font-size="9" text-anchor="middle">FastAPI WebSocket</text><text x="120" y="271" fill="#94a3b8" font-size="9" text-anchor="middle">receiver + validator</text>
+                        <rect x="230" y="215" width="160" height="70" rx="6" fill="#1e293b" stroke="#334155"/><text x="310" y="240" fill="#f1f5f9" font-size="11" font-weight="600" text-anchor="middle">feature_fusion.py</text><text x="310" y="258" fill="#94a3b8" font-size="9" text-anchor="middle">Merge drone + satellite</text><text x="310" y="271" fill="#94a3b8" font-size="9" text-anchor="middle">GeoJSON generation</text>
+                        <rect x="420" y="215" width="160" height="70" rx="6" fill="#1e293b" stroke="#334155"/><text x="500" y="240" fill="#f1f5f9" font-size="11" font-weight="600" text-anchor="middle">PostGIS + Redis</text><text x="500" y="258" fill="#94a3b8" font-size="9" text-anchor="middle">Spatial database</text><text x="500" y="271" fill="#94a3b8" font-size="9" text-anchor="middle">Real-time cache</text>
+                        <rect x="610" y="215" width="150" height="70" rx="6" fill="#1e293b" stroke="#334155"/><text x="685" y="240" fill="#f1f5f9" font-size="11" font-weight="600" text-anchor="middle">Alert Engine</text><text x="685" y="258" fill="#94a3b8" font-size="9" text-anchor="middle">Threshold triggers</text><text x="685" y="271" fill="#94a3b8" font-size="9" text-anchor="middle">Auto-deploy drone</text>
+                        <line x1="200" y1="250" x2="228" y2="250" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+                        <line x1="390" y1="250" x2="418" y2="250" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+                        <line x1="580" y1="250" x2="608" y2="250" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+                        <!-- Arrow Down -->
+                        <line x1="400" y1="305" x2="400" y2="340" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)" stroke-dasharray="4"/>
+                        <text x="415" y="328" fill="#94a3b8" font-size="9">GeoJSON broadcast</text>
+                        <!-- Layer 3: Frontend -->
+                        <rect x="20" y="345" width="760" height="130" rx="8" fill="url(#g3)" stroke="#14b8a6" stroke-opacity="0.3"/>
+                        <text x="40" y="370" fill="#14b8a6" font-size="11" font-weight="600" letter-spacing="2">EXISTING FRONTEND (MODIFIED)</text>
+                        <rect x="40" y="385" width="220" height="70" rx="6" fill="#1e293b" stroke="#334155"/><text x="150" y="410" fill="#f1f5f9" font-size="11" font-weight="600" text-anchor="middle">enhanced.js</text><text x="150" y="428" fill="#94a3b8" font-size="9" text-anchor="middle">+ WebSocket client for drone layers</text><text x="150" y="441" fill="#94a3b8" font-size="9" text-anchor="middle">+ Real-time flood depth overlay</text>
+                        <rect x="290" y="385" width="220" height="70" rx="6" fill="#1e293b" stroke="#334155"/><text x="400" y="410" fill="#f1f5f9" font-size="11" font-weight="600" text-anchor="middle">MapLibre GL JS</text><text x="400" y="428" fill="#94a3b8" font-size="9" text-anchor="middle">+ Drone GeoJSON overlay layers</text><text x="400" y="441" fill="#94a3b8" font-size="9" text-anchor="middle">+ Live drone position marker</text>
+                        <rect x="540" y="385" width="220" height="70" rx="6" fill="#1e293b" stroke="#334155"/><text x="650" y="410" fill="#f1f5f9" font-size="11" font-weight="600" text-anchor="middle">Risk Engine + A*</text><text x="650" y="428" fill="#94a3b8" font-size="9" text-anchor="middle">+ Drone-measured depth input</text><text x="650" y="441" fill="#94a3b8" font-size="9" text-anchor="middle">+ Live rescue path update</text>
+                        <!-- Satellite side input -->
+                        <rect x="20" y="490" width="250" height="25" rx="4" fill="none" stroke="#94a3b8" stroke-opacity="0.3" stroke-dasharray="4"/>
+                        <text x="145" y="507" fill="#94a3b8" font-size="9" text-anchor="middle">Existing: Copernicus + Open-Meteo + CHIRPS (satellite pipeline unchanged)</text>
+                    </svg>
+                    <p class="diagram-caption">Integrated Drone + Satellite Architecture — Three-layer data flow from edge to dashboard</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Drone Hardware -->
+        <div class="section">
+            <h2 class="section-title">Drone Platform: Hardware Specifications</h2>
+            <div class="card">
+                <h3>Airframe & Propulsion</h3>
+                <p>A purpose-built <strong>X-frame quadcopter</strong> optimized for all-weather flood surveillance with IP55 rain resistance, designed around the <strong>DJI Matrice 300 RTK</strong> class of industrial survey drones.</p>
+                <div class="grid-2">
+                    <div class="data-box">
+                        <h4>Airframe</h4>
+                        <div class="data-row"><span class="label">Configuration</span><span class="value">X-frame Quadcopter</span></div>
+                        <div class="data-row"><span class="label">Material</span><span class="value">Carbon Fiber T700</span></div>
+                        <div class="data-row"><span class="label">Wheelbase</span><span class="value">650mm diagonal</span></div>
+                        <div class="data-row"><span class="label">MTOW</span><span class="value">4.5 kg</span></div>
+                        <div class="data-row"><span class="label">Payload Capacity</span><span class="value">1.2 kg</span></div>
+                        <div class="data-row"><span class="label">IP Rating</span><span class="value">IP55</span></div>
+                        <div class="data-row"><span class="label">Operating Temp</span><span class="value">-10°C to 50°C</span></div>
+                    </div>
+                    <div class="data-box">
+                        <h4>Propulsion</h4>
+                        <div class="data-row"><span class="label">Motors</span><span class="value">T-Motor U5 KV400 × 4</span></div>
+                        <div class="data-row"><span class="label">Propellers</span><span class="value">15×5.5" Carbon Fiber</span></div>
+                        <div class="data-row"><span class="label">ESC</span><span class="value">BLHeli_32 50A × 4</span></div>
+                        <div class="data-row"><span class="label">Thrust/Motor</span><span class="value">1.8 kgf @ 100%</span></div>
+                        <div class="data-row"><span class="label">Total Thrust</span><span class="value">7.2 kgf</span></div>
+                        <div class="data-row"><span class="label">Thrust:Weight</span><span class="value">2.8:1</span></div>
+                        <div class="data-row"><span class="label">Hover Throttle</span><span class="value">~38%</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Power System & Endurance</h3>
+                <div class="grid-2">
+                    <div class="data-box">
+                        <h4>Battery</h4>
+                        <div class="data-row"><span class="label">Type</span><span class="value">6S LiPo 22.2V</span></div>
+                        <div class="data-row"><span class="label">Capacity</span><span class="value">10,000 mAh</span></div>
+                        <div class="data-row"><span class="label">Weight</span><span class="value">~980g</span></div>
+                        <div class="data-row"><span class="label">C Rating</span><span class="value">25C continuous</span></div>
+                        <div class="data-row"><span class="label">Charging</span><span class="value">1C fast charge (1hr)</span></div>
+                    </div>
+                    <div class="data-box">
+                        <h4>Flight Endurance</h4>
+                        <div class="data-row"><span class="label">No payload</span><span class="value">45 min</span></div>
+                        <div class="data-row"><span class="label">Full payload (1.2kg)</span><span class="value">32 min</span></div>
+                        <div class="data-row"><span class="label">Max range</span><span class="value">~28 km (round trip)</span></div>
+                        <div class="data-row"><span class="label">Cruise speed</span><span class="value">15 m/s (54 km/h)</span></div>
+                        <div class="data-row"><span class="label">Max speed</span><span class="value">22 m/s (79 km/h)</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Flight Controller & Navigation</h3>
+                <p>The flight controller stack provides <strong>centimeter-level positioning</strong> and <strong>triple-redundant safety</strong>:</p>
+                <table class="data-table">
+                    <thead><tr><th>Component</th><th>Specification</th><th>Purpose</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>Flight Controller</strong></td><td>Pixhawk 6X (FMUv6X)</td><td>Dual STM32H7, triple-redundant IMU</td></tr>
+                        <tr><td><strong>Firmware</strong></td><td>ArduPilot 4.5+</td><td>Open-source, auto-mission, MAVLink 2.0</td></tr>
+                        <tr><td><strong>GNSS</strong></td><td>Dual HERE3+ RTK GPS</td><td>±2cm horizontal accuracy (RTK fixed)</td></tr>
+                        <tr><td><strong>IMU</strong></td><td>ICM-42688-P × 3</td><td>Triple-redundant vibration-isolated</td></tr>
+                        <tr><td><strong>Compass</strong></td><td>IST8310 × 3</td><td>Triple magnetometer for heading</td></tr>
+                        <tr><td><strong>Barometer</strong></td><td>MS5611 × 2</td><td>Altitude hold, ±10cm accuracy</td></tr>
+                        <tr><td><strong>Wind Tolerance</strong></td><td>Up to 38 km/h</td><td>Stable ops in pre-cyclone conditions</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <h3>Sensor Payload Stack</h3>
+                <p>Multi-modal sensor array for comprehensive flood data acquisition:</p>
+                <table class="data-table">
+                    <thead><tr><th>Sensor</th><th>Model</th><th>Key Specs</th><th>Flood Application</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>RGB Camera</strong></td><td>Sony Alpha 7C</td><td>24.2MP, full-frame</td><td>High-res orthomosaic, damage assessment</td></tr>
+                        <tr><td><strong>Multispectral</strong></td><td>MicaSense RedEdge-P</td><td>5 bands (475–840nm)</td><td>NDWI water detection, vegetation stress</td></tr>
+                        <tr><td><strong>Thermal</strong></td><td>FLIR Vue Pro R 640</td><td>640×512, &lt;50mK NETD</td><td>People detection, water temp mapping</td></tr>
+                        <tr><td><strong>LiDAR</strong></td><td>Livox Mid-360</td><td>200k pts/sec, 70m range</td><td>Real-time DEM, flood depth measurement</td></tr>
+                        <tr><td><strong>Gimbal</strong></td><td>Gremsy T3V3</td><td>3-axis, ±0.01° stability</td><td>Vibration-free imaging during flight</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <h3>Communication & Edge Computing</h3>
+                <div class="grid-2">
+                    <div class="data-box">
+                        <h4>Data Links</h4>
+                        <div class="data-row"><span class="label">Telemetry</span><span class="value">RFD900x (900MHz)</span></div>
+                        <div class="data-row"><span class="label">Telemetry Range</span><span class="value">40km LOS</span></div>
+                        <div class="data-row"><span class="label">Video Link</span><span class="value">Herelink HD (2.4GHz)</span></div>
+                        <div class="data-row"><span class="label">Data Fallback</span><span class="value">4G/LTE modem</span></div>
+                    </div>
+                    <div class="data-box">
+                        <h4>Edge Compute</h4>
+                        <div class="data-row"><span class="label">SoC</span><span class="value">NVIDIA Jetson Orin NX</span></div>
+                        <div class="data-row"><span class="label">AI Performance</span><span class="value">100 TOPS (INT8)</span></div>
+                        <div class="data-row"><span class="label">RAM</span><span class="value">16GB LPDDR5</span></div>
+                        <div class="data-row"><span class="label">Storage</span><span class="value">1TB NVMe SSD</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Aerodynamics -->
+        <div class="section">
+            <h2 class="section-title">Aerodynamic Analysis</h2>
+            <div class="card">
+                <h3>Thrust & Hover Performance</h3>
+                <p>The propulsion system is designed with a <strong>2.8:1 thrust-to-weight ratio</strong>, providing ample margin for payload and wind resistance:</p>
+                <div class="formula">
+                    <strong>Thrust per motor:</strong> T = C_t × ρ × n² × D⁴
+                    <div class="comment">C_t = 0.012 (thrust coefficient), ρ = 1.225 kg/m³ (air density at sea level), n = rev/s, D = 0.381m (15" prop diameter)</div>
+                </div>
+                <div class="formula">
+                    <strong>Hover power (ideal):</strong> P_hover = W^(3/2) / √(2 × ρ × A_disc)
+                    <div class="comment">W = 44.1N (4.5kg MTOW), A_disc = 4 × π × (0.19m)² = 0.454 m². Disc loading = 97.1 N/m². P_hover ≈ 380W total → ~17A from 6S battery at hover.</div>
+                </div>
+                <div class="formula">
+                    <strong>Forward flight drag:</strong> D = ½ × ρ × V² × C_d × A_frontal
+                    <div class="comment">At cruise V = 15 m/s: C_d = 0.25, A = 0.08 m², Drag ≈ 1.38N, Parasite power ≈ 20.7W. Total cruise power ≈ 420W.</div>
+                </div>
+                <div class="alert info">
+                    <strong>Endurance Calculation:</strong>
+                    <p>Battery energy = 22.2V × 10Ah = 222 Wh. At ~420W cruise power (with payload), usable capacity (80% DoD) = 177.6 Wh → <strong>~25 min cruise + 7 min hover reserve = 32 min mission time</strong>.</p>
+                </div>
+            </div>
+            <div class="card">
+                <h3>Stability & Control</h3>
+                <p>The Pixhawk 6X uses cascaded PID loops for attitude stabilization:</p>
+                <div class="formula">
+                    <strong>Torque equation:</strong> τ = I × α = r × ΔF
+                    <div class="comment">Where I = moment of inertia (~0.02 kg·m²), r = motor arm length (0.325m), ΔF = differential thrust. Roll/Pitch rate: 300°/s, Yaw rate: 150°/s.</div>
+                </div>
+                <div class="grid-2">
+                    <div class="data-box">
+                        <h4>PID Controller Response</h4>
+                        <div class="data-row"><span class="label">Roll/Pitch settling</span><span class="value">&lt;200ms</span></div>
+                        <div class="data-row"><span class="label">Heading accuracy</span><span class="value">±0.5° in 38 km/h wind</span></div>
+                        <div class="data-row"><span class="label">Position hold</span><span class="value">±10cm (RTK mode)</span></div>
+                        <div class="data-row"><span class="label">Altitude hold</span><span class="value">±10cm</span></div>
+                    </div>
+                    <div class="data-box">
+                        <h4>Safety Systems</h4>
+                        <div class="data-row"><span class="label">Failsafe: Low Battery</span><span class="value">RTL at &lt;20%</span></div>
+                        <div class="data-row"><span class="label">Failsafe: Comms Loss</span><span class="value">RTL after 30s</span></div>
+                        <div class="data-row"><span class="label">Failsafe: GPS Loss</span><span class="value">Altitude hold + RTL</span></div>
+                        <div class="data-row"><span class="label">Parachute</span><span class="value">Auto-deploy on freefall</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. Feature Extraction Pipeline -->
+        <div class="section">
+            <h2 class="section-title">Feature Extraction Pipeline</h2>
+            <div class="card">
+                <h3>6-Stage Processing Pipeline</h3>
+                <p>Multi-stage computer vision pipeline running as a <strong>hybrid edge-cloud architecture</strong>. Stages 1–4 execute on the <strong>Jetson Orin NX</strong> (onboard), stages 5–6 on the <strong>cloud backend</strong>:</p>
+                <ol class="pipeline">
+                    <li><strong>Raw Data Acquisition:</strong> Synchronized capture of RGB (24MP), multispectral (5-band), thermal (640×512), and LiDAR (200k pts/sec) at 5cm GSD. All frames geotagged with RTK-corrected coordinates (±2cm).</li>
+                    <li><strong>Edge Preprocessing:</strong> Real-time image stitching (OpenCV), radiometric calibration, and NDWI computation. NDWI = (Green − NIR) / (Green + NIR). Pixels with NDWI > 0.3 flagged as water. Runs at 30 FPS on Jetson Orin NX.</li>
+                    <li><strong>Water Surface Segmentation:</strong> Segment Anything Model (SAM) with flood-specific prompts segments water extent. U-Net fallback for edge cases. Combined with NDWI thresholding for 95%+ water detection accuracy across varied conditions.</li>
+                    <li><strong>Object Detection:</strong> YOLOv8-X (TensorRT optimized) detects: stranded people, submerged vehicles, damaged structures, debris fields, blocked roads. Custom model trained on 10,000+ labeled flood images. Inference at 45 FPS.</li>
+                    <li><strong>DEM Reconstruction:</strong> LiDAR point cloud → Open3D → real-time 5cm DEM. Flood depth = current water surface elevation − pre-flood DEM. Stereo photogrammetry as fallback where LiDAR has gaps.</li>
+                    <li><strong>Fusion & Broadcast:</strong> All features encoded as GeoJSON FeatureCollections. Pushed to Jal Drishti dashboard via WebSocket. Drone flood layers rendered on MapLibre alongside existing satellite risk grid.</li>
+                </ol>
+            </div>
+            <div class="card">
+                <h3>Feature Extraction Pipeline Diagram</h3>
+                <div class="diagram-container">
+                    <svg viewBox="0 0 800 340" xmlns="http://www.w3.org/2000/svg" style="font-family: Inter, sans-serif;">
+                        <defs><marker id="arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#14b8a6"/></marker></defs>
+                        <!-- Stage boxes -->
+                        <rect x="10" y="20" width="120" height="80" rx="6" fill="#1e293b" stroke="#0ea5e9" stroke-opacity="0.5"/><text x="70" y="45" fill="#0ea5e9" font-size="9" font-weight="600" text-anchor="middle">STAGE 1</text><text x="70" y="62" fill="#f1f5f9" font-size="10" font-weight="600" text-anchor="middle">Raw Capture</text><text x="70" y="78" fill="#94a3b8" font-size="8" text-anchor="middle">RGB+LiDAR+Thermal</text><text x="70" y="90" fill="#94a3b8" font-size="8" text-anchor="middle">5cm GSD</text>
+                        <line x1="130" y1="60" x2="145" y2="60" stroke="#14b8a6" stroke-width="1.5" marker-end="url(#arr2)"/>
+                        <rect x="148" y="20" width="120" height="80" rx="6" fill="#1e293b" stroke="#0ea5e9" stroke-opacity="0.5"/><text x="208" y="45" fill="#0ea5e9" font-size="9" font-weight="600" text-anchor="middle">STAGE 2</text><text x="208" y="62" fill="#f1f5f9" font-size="10" font-weight="600" text-anchor="middle">Preprocessing</text><text x="208" y="78" fill="#94a3b8" font-size="8" text-anchor="middle">OpenCV stitch</text><text x="208" y="90" fill="#94a3b8" font-size="8" text-anchor="middle">NDWI compute</text>
+                        <line x1="268" y1="60" x2="283" y2="60" stroke="#14b8a6" stroke-width="1.5" marker-end="url(#arr2)"/>
+                        <rect x="286" y="20" width="120" height="80" rx="6" fill="#1e293b" stroke="#0ea5e9" stroke-opacity="0.5"/><text x="346" y="45" fill="#0ea5e9" font-size="9" font-weight="600" text-anchor="middle">STAGE 3</text><text x="346" y="62" fill="#f1f5f9" font-size="10" font-weight="600" text-anchor="middle">Segmentation</text><text x="346" y="78" fill="#94a3b8" font-size="8" text-anchor="middle">SAM + U-Net</text><text x="346" y="90" fill="#94a3b8" font-size="8" text-anchor="middle">Water mask</text>
+                        <line x1="406" y1="60" x2="421" y2="60" stroke="#14b8a6" stroke-width="1.5" marker-end="url(#arr2)"/>
+                        <rect x="424" y="20" width="120" height="80" rx="6" fill="#1e293b" stroke="#8b5cf6" stroke-opacity="0.5"/><text x="484" y="45" fill="#8b5cf6" font-size="9" font-weight="600" text-anchor="middle">STAGE 4</text><text x="484" y="62" fill="#f1f5f9" font-size="10" font-weight="600" text-anchor="middle">Detection</text><text x="484" y="78" fill="#94a3b8" font-size="8" text-anchor="middle">YOLOv8-X</text><text x="484" y="90" fill="#94a3b8" font-size="8" text-anchor="middle">45 FPS</text>
+                        <line x1="544" y1="60" x2="559" y2="60" stroke="#14b8a6" stroke-width="1.5" marker-end="url(#arr2)"/>
+                        <rect x="562" y="20" width="110" height="80" rx="6" fill="#1e293b" stroke="#8b5cf6" stroke-opacity="0.5"/><text x="617" y="45" fill="#8b5cf6" font-size="9" font-weight="600" text-anchor="middle">STAGE 5</text><text x="617" y="62" fill="#f1f5f9" font-size="10" font-weight="600" text-anchor="middle">DEM Build</text><text x="617" y="78" fill="#94a3b8" font-size="8" text-anchor="middle">Open3D LiDAR</text><text x="617" y="90" fill="#94a3b8" font-size="8" text-anchor="middle">Depth map</text>
+                        <line x1="672" y1="60" x2="687" y2="60" stroke="#14b8a6" stroke-width="1.5" marker-end="url(#arr2)"/>
+                        <rect x="690" y="20" width="100" height="80" rx="6" fill="#1e293b" stroke="#14b8a6" stroke-opacity="0.5"/><text x="740" y="45" fill="#14b8a6" font-size="9" font-weight="600" text-anchor="middle">STAGE 6</text><text x="740" y="62" fill="#f1f5f9" font-size="10" font-weight="600" text-anchor="middle">Fusion</text><text x="740" y="78" fill="#94a3b8" font-size="8" text-anchor="middle">GeoJSON</text><text x="740" y="90" fill="#94a3b8" font-size="8" text-anchor="middle">→ Dashboard</text>
+                        <!-- Edge vs Cloud boundary -->
+                        <line x1="420" y1="5" x2="420" y2="115" stroke="#f59e0b" stroke-width="1" stroke-dasharray="6,3"/>
+                        <text x="250" y="125" fill="#0ea5e9" font-size="9" font-weight="600" text-anchor="middle">◄ EDGE (Jetson Orin NX, onboard) ►</text>
+                        <text x="610" y="125" fill="#8b5cf6" font-size="9" font-weight="600" text-anchor="middle">◄ CLOUD BACKEND ►</text>
+                        <!-- Output features diagram -->
+                        <text x="400" y="160" fill="#f1f5f9" font-size="11" font-weight="600" text-anchor="middle">Extracted Feature Outputs</text>
+                        <rect x="30" y="175" width="145" height="55" rx="6" fill="#1e293b" stroke="#22c55e" stroke-opacity="0.4"/><text x="102" y="197" fill="#22c55e" font-size="10" font-weight="600" text-anchor="middle">🌊 Water Extent</text><text x="102" y="215" fill="#94a3b8" font-size="8" text-anchor="middle">Polygons + area (m²)</text>
+                        <rect x="195" y="175" width="145" height="55" rx="6" fill="#1e293b" stroke="#0ea5e9" stroke-opacity="0.4"/><text x="267" y="197" fill="#0ea5e9" font-size="10" font-weight="600" text-anchor="middle">📏 Flood Depth</text><text x="267" y="215" fill="#94a3b8" font-size="8" text-anchor="middle">Grid (5cm res, meters)</text>
+                        <rect x="360" y="175" width="145" height="55" rx="6" fill="#1e293b" stroke="#f59e0b" stroke-opacity="0.4"/><text x="432" y="197" fill="#f59e0b" font-size="10" font-weight="600" text-anchor="middle">🏚️ Damage Map</text><text x="432" y="215" fill="#94a3b8" font-size="8" text-anchor="middle">BBox + severity class</text>
+                        <rect x="525" y="175" width="122" height="55" rx="6" fill="#1e293b" stroke="#ef4444" stroke-opacity="0.4"/><text x="586" y="197" fill="#ef4444" font-size="10" font-weight="600" text-anchor="middle">👤 Rescues</text><text x="586" y="215" fill="#94a3b8" font-size="8" text-anchor="middle">People + vehicle locs</text>
+                        <rect x="667" y="175" width="122" height="55" rx="6" fill="#1e293b" stroke="#8b5cf6" stroke-opacity="0.4"/><text x="728" y="197" fill="#8b5cf6" font-size="10" font-weight="600" text-anchor="middle">🗺️ HD DEM</text><text x="728" y="215" fill="#94a3b8" font-size="8" text-anchor="middle">5cm elevation grid</text>
+                        <!-- NDWI Formula -->
+                        <rect x="100" y="260" width="600" height="60" rx="6" fill="#0f172a" stroke="#334155"/>
+                        <text x="400" y="283" fill="#14b8a6" font-size="11" font-weight="600" text-anchor="middle" font-family="Monaco, Consolas, monospace">NDWI = (Green − NIR) / (Green + NIR)    |    Water threshold: NDWI > 0.3</text>
+                        <text x="400" y="305" fill="#94a3b8" font-size="9" text-anchor="middle">MicaSense RedEdge-P Band 2 (560nm) and Band 5 (840nm) used for computation</text>
+                    </svg>
+                    <p class="diagram-caption">Feature Extraction Pipeline — Edge-Cloud Hybrid Processing with 6 Output Feature Types</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. Dashboard Integration Code -->
+        <div class="section">
+            <h2 class="section-title">Code Integration with Jal Drishti</h2>
+            <div class="card">
+                <h3>New Backend Modules</h3>
+                <p>Three new Python modules integrate drone data with the existing system:</p>
+                <table class="data-table">
+                    <thead><tr><th>Module</th><th>Technology</th><th>Function</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>drone_ingest.py</strong></td><td>FastAPI + WebSocket</td><td>Receives real-time drone GeoJSON streams, validates schema, caches in Redis</td></tr>
+                        <tr><td><strong>feature_fusion.py</strong></td><td>GeoPandas + Shapely</td><td>Merges drone features with satellite risk grid, resolves spatial conflicts</td></tr>
+                        <tr><td><strong>auto_deploy.py</strong></td><td>MAVLink + dronekit</td><td>Generates flight plans from risk grid, sends MAVLink commands to Pixhawk</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="card">
+                <h3>Frontend Modifications to enhanced.js</h3>
+                <p>The existing dashboard JavaScript receives modifications to consume drone data:</p>
+                <ol class="pipeline">
+                    <li><strong>WebSocket Client:</strong> New <code>DroneDataManager</code> class connects to <code>wss://host/ws/drone-feed</code>, handles reconnection, and buffers incoming GeoJSON frames.</li>
+                    <li><strong>MapLibre Layers:</strong> Three new layers added — <code>drone-flood-fill</code> (water extent), <code>drone-depth-heatmap</code> (depth gradient), <code>drone-detections</code> (YOLO bounding boxes).</li>
+                    <li><strong>Risk Engine Update:</strong> The existing <code>calculateRiskScore()</code> function now accepts an optional <code>droneDepth</code> parameter that overrides simulated depth when live drone data is available.</li>
+                    <li><strong>Rescue Path Recalculation:</strong> A* pathfinding recalculates in real-time when drone data updates flood depth values, providing ground-truth-based rescue routes.</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- 8. Autonomous Operations -->
+        <div class="section">
+            <h2 class="section-title">Autonomous Operations Protocol</h2>
+            <div class="card">
+                <h3>Auto-Deploy Trigger System</h3>
+                <p>The drone launches autonomously when Jal Drishti's ML models predict a flood event:</p>
+                <div class="diagram-container">
+                    <svg viewBox="0 0 800 200" xmlns="http://www.w3.org/2000/svg" style="font-family: Inter, sans-serif;">
+                        <defs><marker id="arr3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#14b8a6"/></marker></defs>
+                        <rect x="10" y="60" width="140" height="70" rx="8" fill="#1e293b" stroke="#f59e0b" stroke-opacity="0.5"/><text x="80" y="88" fill="#f59e0b" font-size="10" font-weight="600" text-anchor="middle">⚠️ Rainfall Alert</text><text x="80" y="106" fill="#94a3b8" font-size="8" text-anchor="middle">&gt;100mm/24h predicted</text><text x="80" y="118" fill="#94a3b8" font-size="8" text-anchor="middle">by LSTM model</text>
+                        <line x1="150" y1="95" x2="170" y2="95" stroke="#14b8a6" stroke-width="1.5" marker-end="url(#arr3)"/>
+                        <rect x="173" y="60" width="140" height="70" rx="8" fill="#1e293b" stroke="#0ea5e9" stroke-opacity="0.5"/><text x="243" y="88" fill="#0ea5e9" font-size="10" font-weight="600" text-anchor="middle">📋 Flight Plan</text><text x="243" y="106" fill="#94a3b8" font-size="8" text-anchor="middle">auto_deploy.py generates</text><text x="243" y="118" fill="#94a3b8" font-size="8" text-anchor="middle">waypoints from risk grid</text>
+                        <line x1="313" y1="95" x2="333" y2="95" stroke="#14b8a6" stroke-width="1.5" marker-end="url(#arr3)"/>
+                        <rect x="336" y="60" width="140" height="70" rx="8" fill="#1e293b" stroke="#22c55e" stroke-opacity="0.5"/><text x="406" y="88" fill="#22c55e" font-size="10" font-weight="600" text-anchor="middle">🚁 Auto Launch</text><text x="406" y="106" fill="#94a3b8" font-size="8" text-anchor="middle">MAVLink ARM + TAKEOFF</text><text x="406" y="118" fill="#94a3b8" font-size="8" text-anchor="middle">from docking station</text>
+                        <line x1="476" y1="95" x2="496" y2="95" stroke="#14b8a6" stroke-width="1.5" marker-end="url(#arr3)"/>
+                        <rect x="499" y="60" width="140" height="70" rx="8" fill="#1e293b" stroke="#8b5cf6" stroke-opacity="0.5"/><text x="569" y="88" fill="#8b5cf6" font-size="10" font-weight="600" text-anchor="middle">📡 Survey & Stream</text><text x="569" y="106" fill="#94a3b8" font-size="8" text-anchor="middle">Autonomous scan</text><text x="569" y="118" fill="#94a3b8" font-size="8" text-anchor="middle">Live data to dashboard</text>
+                        <line x1="639" y1="95" x2="659" y2="95" stroke="#14b8a6" stroke-width="1.5" marker-end="url(#arr3)"/>
+                        <rect x="662" y="60" width="130" height="70" rx="8" fill="#1e293b" stroke="#14b8a6" stroke-opacity="0.5"/><text x="727" y="88" fill="#14b8a6" font-size="10" font-weight="600" text-anchor="middle">🔋 RTL & Charge</text><text x="727" y="106" fill="#94a3b8" font-size="8" text-anchor="middle">Auto-land on dock</text><text x="727" y="118" fill="#94a3b8" font-size="8" text-anchor="middle">Solar-powered charge</text>
+                        <text x="400" y="165" fill="#94a3b8" font-size="9" text-anchor="middle">Complete autonomous cycle time: ~45 minutes (including takeoff, survey, landing, and charging)</text>
+                        <text x="400" y="185" fill="#94a3b8" font-size="9" text-anchor="middle">Multiple sorties per day with hot-swap battery system</text>
+                    </svg>
+                    <p class="diagram-caption">Autonomous Flood Surveillance Cycle — Triggered by ML-based rainfall prediction</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 9. Implementation Roadmap -->
+        <div class="section">
+            <h2 class="section-title">Implementation Roadmap</h2>
+            <div class="card">
+                <div class="risk-levels">
+                    <div class="risk-level phase1"><h4>Phase 1: Foundation (M1–M3)</h4><p>Quadcopter assembly, ArduPilot config, RTK GPS calibration, IP55 validation, endurance testing — ₹3.5–4.5L</p></div>
+                    <div class="risk-level phase2"><h4>Phase 2: Sensing (M3–M5)</h4><p>Camera + LiDAR + thermal mount, gimbal integration, sensor time-sync to GPS PPS, reflectance panel calibration — ₹5–7L</p></div>
+                    <div class="risk-level phase3"><h4>Phase 3: Intelligence (M5–M8)</h4><p>YOLOv8 training (10k+ images), SAM fine-tuning, TensorRT optimization, LiDAR→DEM pipeline, NDWI pipeline — ₹2–3L</p></div>
+                    <div class="risk-level phase4"><h4>Phase 4: Integration (M8–M10)</h4><p>FastAPI WebSocket backend, feature_fusion.py, PostGIS + Redis setup, MapLibre drone layers, risk engine updates — ₹1–1.5L</p></div>
+                    <div class="risk-level phase5"><h4>Phase 5: Deployment (M10–M12)</h4><p>Field trials at Meppadi/Darbhanga/Dhemaji, DGCA compliance, auto-deploy testing, operator training — ₹1.5–2L</p></div>
+                </div>
+                <div class="alert warning">
+                    <strong>Total Estimated Budget: ₹13–18 Lakhs</strong>
+                    <p>Includes hardware procurement, compute infrastructure, field testing, and regulatory compliance. Does not include recurring operational costs (4G data, battery replacement).</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 10. Regulatory -->
+        <div class="section">
+            <h2 class="section-title">Regulatory Compliance (DGCA India)</h2>
+            <div class="card">
+                <table class="data-table">
+                    <thead><tr><th>Requirement</th><th>Status / Plan</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>Drone Category</strong></td><td>Small (2–25 kg MTOW) — requires Type Certificate</td></tr>
+                        <tr><td><strong>UIN Registration</strong></td><td>Via DigitalSky platform (mandatory)</td></tr>
+                        <tr><td><strong>Remote Pilot License</strong></td><td>DGCA-certified training for operator</td></tr>
+                        <tr><td><strong>Flight Permission</strong></td><td>Automated FPL via DigitalSky API integration</td></tr>
+                        <tr><td><strong>No-Fly Zones</strong></td><td>Geo-fenced in ArduPilot firmware (airports, military)</td></tr>
+                        <tr><td><strong>Insurance</strong></td><td>Third-party liability (mandatory for Small category)</td></tr>
+                        <tr><td><strong>Emergency Exemption</strong></td><td>NDMA emergency authorization for disaster operations</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 11. Projected Impact -->
+        <div class="section">
+            <h2 class="section-title">Projected Impact Metrics</h2>
+            <div class="card">
+                <div class="grid-2">
+                    <div class="data-box">
+                        <h4>Resolution Improvement</h4>
+                        <div class="data-row"><span class="label">Current DEM</span><span class="value">30m (satellite)</span></div>
+                        <div class="data-row"><span class="label">Future DEM</span><span class="value">5cm (LiDAR)</span></div>
+                        <div class="data-row"><span class="label">Improvement</span><span class="value" style="color:#14b8a6;">600× finer</span></div>
+                    </div>
+                    <div class="data-box">
+                        <h4>Detection Accuracy</h4>
+                        <div class="data-row"><span class="label">Water detection</span><span class="value">95% (multi-sensor)</span></div>
+                        <div class="data-row"><span class="label">Object detection</span><span class="value">92% mAP (YOLOv8)</span></div>
+                        <div class="data-row"><span class="label">Depth accuracy</span><span class="value">±5cm (LiDAR)</span></div>
+                    </div>
+                    <div class="data-box">
+                        <h4>Response Time</h4>
+                        <div class="data-row"><span class="label">Data latency</span><span class="value">&lt;5 min (vs 6–24hr)</span></div>
+                        <div class="data-row"><span class="label">Earlier warning</span><span class="value">~4.5 hrs gained</span></div>
+                        <div class="data-row"><span class="label">Evacuation speed</span><span class="value">+30% faster</span></div>
+                    </div>
+                    <div class="data-box">
+                        <h4>Operational</h4>
+                        <div class="data-row"><span class="label">Flight time</span><span class="value">32 min per sortie</span></div>
+                        <div class="data-row"><span class="label">Coverage</span><span class="value">~5 km² per sortie</span></div>
+                        <div class="data-row"><span class="label">Sorties/day</span><span class="value">4–6 (with charging)</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Jal Drishti 2.0 • Drone Intelligence: Augmented Flood Monitoring • Technical Roadmap Document</p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,74 @@
+{
+  "accuracy": 0.8,
+  "f1_score": 0.7997,
+  "cv_mean_accuracy": 0.8076,
+  "cv_std": 0.0074,
+  "n_estimators": 200,
+  "max_depth": 15,
+  "training_samples": 12000,
+  "test_samples": 3000,
+  "feature_importance": {
+    "elevation_m": 0.0721,
+    "slope_deg": 0.0962,
+    "flow_accumulation": 0.1653,
+    "twi": 0.0671,
+    "dist_to_river_m": 0.1973,
+    "rainfall_mm": 0.3186,
+    "soil_moisture": 0.0637,
+    "land_use_encoded": 0.0198
+  },
+  "confusion_matrix": [
+    [
+      124,
+      61,
+      0,
+      0
+    ],
+    [
+      37,
+      765,
+      152,
+      1
+    ],
+    [
+      0,
+      143,
+      1003,
+      100
+    ],
+    [
+      0,
+      0,
+      106,
+      508
+    ]
+  ],
+  "per_class_metrics": {
+    "low": {
+      "precision": 0.7702,
+      "recall": 0.6703,
+      "f1": 0.7168,
+      "support": 185
+    },
+    "medium": {
+      "precision": 0.7895,
+      "recall": 0.801,
+      "f1": 0.7952,
+      "support": 955
+    },
+    "high": {
+      "precision": 0.7954,
+      "recall": 0.805,
+      "f1": 0.8002,
+      "support": 1246
+    },
+    "extreme": {
+      "precision": 0.8342,
+      "recall": 0.8274,
+      "f1": 0.8307,
+      "support": 614
+    }
+  },
+  "trained_at": "2026-03-15T04:13:18.770727+00:00",
+  "model_version": "v2.1-rf"
+}

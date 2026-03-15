@@ -33,6 +33,7 @@
             <div class="nav-links" id="main-nav-links">
                 <a href="user-guide.html" class="nav-link" id="link-user-guide">User Guide</a>
                 <a href="methodology.html" class="nav-link" id="link-methodology">Methodology</a>
+                <a href="drone-intelligence.html" class="nav-link" id="link-drone">Drone Intelligence</a>
             </div>
             <div class="system-status">
             </div>
@@ -101,19 +102,27 @@
                     </div>
                 </div>
 
-                <!-- Model Accuracy Bar -->
-                <div class="model-accuracy-section">
-                    <div class="accuracy-header">
-                        <span>Prediction Accuracy</span>
-                        <span id="modelAccuracyValue">--</span>
+                <!-- Model Tags -->
+                <div class="model-tags" style="margin-top:8px;">
+                    <span class="model-tag">Random Forest</span>
+                    <span class="model-tag">200 Trees</span>
+                    <span class="model-tag">8 Features</span>
+                </div>
+
+                <!-- ML Feature Importance -->
+                <div style="margin-top:12px; background:rgba(0,0,0,0.2); border-radius:8px; padding:12px; border:1px solid rgba(255,255,255,0.05);">
+                    <div class="label-tiny" style="margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+                        <span>🧠 ML FEATURE IMPORTANCE</span>
+                        <span class="model-tag" style="font-size:0.55rem;">v2.1-RF</span>
                     </div>
-                    <div class="accuracy-bar">
-                        <div class="accuracy-fill" id="accuracyFill"></div>
-                    </div>
-                    <div class="model-tags">
-                        <span class="model-tag">LSTM</span>
-                        <span class="model-tag">BiLSTM</span>
-                        <span class="model-tag">XGBoost</span>
+                    <div id="mlFeatureImportance" style="display:flex; flex-direction:column; gap:4px;"></div>
+                </div>
+
+                <!-- ML Risk Prediction Summary -->
+                <div style="margin-top:12px; background:rgba(0,0,0,0.2); border-radius:8px; padding:12px; border:1px solid rgba(255,255,255,0.05);">
+                    <div class="label-tiny" style="margin-bottom:8px;">📊 ML RISK PREDICTION</div>
+                    <div id="mlPredictionSummary" style="display:flex; flex-direction:column; gap:4px;">
+                        <div style="font-size:0.7rem; color:var(--text-muted); font-style:italic;">Run simulation to generate prediction...</div>
                     </div>
                 </div>
             </div>

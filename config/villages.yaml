@@ -1,0 +1,83 @@
+# =============================================
+# Jal Drishti - Village Configuration
+# =============================================
+# Defines all supported villages and their terrain characteristics
+
+villages:
+  wayanad_meppadi:
+    name: "Meppadi"
+    state: "Kerala"
+    district: "Wayanad"
+    terrain_type: "hilly_ghats"
+    coordinates:
+      lat: 11.555
+      lon: 76.135
+    bbox: [76.10, 11.52, 76.17, 11.59]
+    population: 50000
+    dem_source: "SRTM_30m"
+    terrain_config:
+      base_elevation: 780
+      elevation_range: 200
+      runoff_multiplier: 1.8
+      flash_flood_prone: true
+    risk_factors:
+      - "Landslide Risk"
+      - "Flash Flood"
+      - "Debris Flow"
+    flood_characteristic: "Rapid valley accumulation with high-velocity runoff"
+    evacuation_advice: "Move to higher ground immediately; avoid all valley floors"
+    data_files:
+      boundary: "wayanad_meppadi_boundary.geojson"
+      buildings: "wayanad_meppadi_buildings.geojson"
+
+  darbhanga:
+    name: "Darbhanga"
+    state: "Bihar"
+    district: "Darbhanga"
+    terrain_type: "riverine_plain"
+    coordinates:
+      lat: 26.120
+      lon: 85.900
+    bbox: [85.85, 26.12, 85.93, 26.19]
+    population: 100000
+    dem_source: "SRTM_30m"
+    terrain_config:
+      base_elevation: 53
+      elevation_range: 10
+      runoff_multiplier: 0.9
+      embankment_breach_prone: true
+    risk_factors:
+      - "River Overflow"
+      - "Embankment Breach"
+      - "Stagnant Water"
+    flood_characteristic: "Linear channel spread with secondary drainage congestion"
+    evacuation_advice: "Relocate to elevated community shelters; avoid embankments"
+    data_files:
+      boundary: "darbhanga_boundary.geojson"
+      buildings: "darbhanga_buildings.geojson"
+
+  dhemaji:
+    name: "Dhemaji"
+    state: "Assam"
+    district: "Dhemaji"
+    terrain_type: "brahmaputra_floodplain"
+    coordinates:
+      lat: 27.480
+      lon: 94.560
+    bbox: [94.53, 27.45, 94.60, 27.51]
+    population: 75000
+    dem_source: "SRTM_30m"
+    terrain_config:
+      base_elevation: 53
+      elevation_range: 15
+      runoff_multiplier: 1.3
+      river_swell_prone: true
+    risk_factors:
+      - "River Swell"
+      - "Bank Erosion"
+      - "Widespread Sheet Flooding"
+    flood_characteristic: "Extensive low-velocity sheet flooding across entire plains"
+    evacuation_advice: "Move to raised platforms (Chang Ghars) or designated high ground"
+    data_files:
+      boundary: "dhemaji_boundary.geojson"
+      buildings: "dhemaji_buildings.geojson"
