@@ -89,7 +89,12 @@ SIMULATION = {
 API_CONFIG = {
     "host": os.getenv("API_HOST", "0.0.0.0"),
     "port": int(os.getenv("API_PORT", "8000")),
-    "cors_origins": ["http://localhost:8001", "https://jaldhristhi-mission-control.vercel.app"],
+    "cors_origins": [
+        "http://localhost:8000",
+        "http://localhost:8001",
+        "https://jaldhristhi-mission-control.vercel.app",
+        "*",  # Allow all origins in production (served from same domain)
+    ],
     "rate_limit": 100,  # requests per minute
 }
 
