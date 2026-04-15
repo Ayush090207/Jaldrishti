@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Train the Random Forest Flood Risk Classifier
+Train the XGBoost Flood Risk Classifier
 ===============================================
 Generates synthetic training data across 3 terrain types,
-trains a Random Forest classifier, and saves the model artifacts.
+trains an XGBoost classifier, and saves the model artifacts.
 
 Usage:
     python scripts/train_model.py
@@ -28,15 +28,15 @@ logger = logging.getLogger(__name__)
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Train Jal Drishti ML Model")
+    parser = argparse.ArgumentParser(description="Train Jal Drishti XGBoost Model")
     parser.add_argument("--samples", type=int, default=15000, help="Training samples")
-    parser.add_argument("--estimators", type=int, default=200, help="Number of trees")
-    parser.add_argument("--depth", type=int, default=15, help="Max tree depth")
+    parser.add_argument("--estimators", type=int, default=300, help="Number of boosting rounds")
+    parser.add_argument("--depth", type=int, default=8, help="Max tree depth")
     parser.add_argument("--output", type=str, default="src/models/saved", help="Output dir")
     args = parser.parse_args()
 
     print("=" * 60)
-    print("  JAL DRISHTI — Random Forest Model Training")
+    print("  JAL DRISHTI — XGBoost Model Training")
     print("=" * 60)
 
     # 1. Generate training data
@@ -48,7 +48,7 @@ def main():
     print(f"  Class distribution: {class_counts}")
 
     # 2. Train model
-    print(f"\n▸ Training Random Forest ({args.estimators} trees, max_depth={args.depth})...")
+    print(f"\n▸ Training XGBoost ({args.estimators} rounds, max_depth={args.depth})...")
     result = train_model(X, y, n_estimators=args.estimators, max_depth=args.depth)
 
     metrics = result["metrics"]

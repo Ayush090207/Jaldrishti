@@ -31,9 +31,7 @@
                 <div class="scan-line"></div>
             </div>
             <div class="nav-links" id="main-nav-links">
-                <a href="user-guide.html" class="nav-link" id="link-user-guide">User Guide</a>
                 <a href="methodology.html" class="nav-link" id="link-methodology">Methodology</a>
-                <a href="drone-intelligence.html" class="nav-link" id="link-drone">Drone Intelligence</a>
             </div>
             <div class="system-status">
             </div>
@@ -104,8 +102,8 @@
 
                 <!-- Model Tags -->
                 <div class="model-tags" style="margin-top:8px;">
-                    <span class="model-tag">Random Forest</span>
-                    <span class="model-tag">200 Trees</span>
+                    <span class="model-tag">XGBoost</span>
+                    <span class="model-tag">300 Rounds</span>
                     <span class="model-tag">8 Features</span>
                 </div>
 
@@ -113,7 +111,7 @@
                 <div style="margin-top:12px; background:rgba(0,0,0,0.2); border-radius:8px; padding:12px; border:1px solid rgba(255,255,255,0.05);">
                     <div class="label-tiny" style="margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
                         <span>🧠 ML FEATURE IMPORTANCE</span>
-                        <span class="model-tag" style="font-size:0.55rem;">v2.1-RF</span>
+                        <span class="model-tag" style="font-size:0.55rem;">v2.1-XGB</span>
                     </div>
                     <div id="mlFeatureImportance" style="display:flex; flex-direction:column; gap:4px;"></div>
                 </div>
@@ -269,6 +267,18 @@
                         onclick="stopOptimization()">
                         🛑 STOP
                     </button>
+                </div>
+
+                <!-- Deployment Report Download -->
+                <button id="btnDownloadDeploymentReport" class="action-btn"
+                    style="width:100%; margin:8px 0 0 0; background:linear-gradient(135deg, rgba(34, 211, 238, 0.3) 0%, rgba(59, 130, 246, 0.2) 100%); border-color:rgba(34, 211, 238, 0.4); font-weight:700; letter-spacing:0.5px; display:flex; align-items:center; justify-content:center; gap:6px;"
+                    onclick="generateDeploymentReport()">
+                    📋 DOWNLOAD DEPLOYMENT REPORT
+                </button>
+
+                <!-- Phase Summary -->
+                <div id="deployment-phase-summary" style="display:flex; flex-direction:column; gap:4px; margin-top:12px;">
+                    <!-- Populated by JS after optimization -->
                 </div>
 
                 <div id="deployment-recommendations" style="margin-top:12px;">

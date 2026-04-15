@@ -339,10 +339,10 @@ async function fetchDashboardData() {
                 accuracy: 0.942,
                 f1_score: 0.938,
                 cv_accuracy: 0.946,
-                model_type: 'Random Forest',
-                n_estimators: 200,
-                max_depth: 15,
-                model_version: 'v2.1-rf',
+                model_type: 'XGBoost',
+                n_estimators: 300,
+                max_depth: 8,
+                model_version: 'v2.1-xgb',
                 feature_importance: {
                     rainfall_mm: 0.286,
                     dist_to_river_m: 0.213,
@@ -4249,12 +4249,69 @@ const RESCUE_HUBS = {
     ]
 };
 
+// =============================================
+// VILLAGE-SPECIFIC RESOURCE INVENTORIES
+// =============================================
+const VILLAGE_RESOURCE_INVENTORY = {
+    'wayanad_meppadi': {
+        base: { boats: 7, ambulances: 4, helicopters: 3, personnel: 55, relief_kits: 600, medical_kits: 300 },
+        surge_multiplier: 1.5, // NDRF can surge
+        terrain_label: 'Hilly Western Ghats',
+        flood_type: 'Flash Flood & Landslide',
+        risk_factors: ['Landslide Risk', 'Flash Flood', 'Debris Flow'],
+        evacuation_advice: 'Move to higher ground immediately; avoid all valley floors',
+        deploy_priorities: ['helicopters', 'medical_kits', 'ambulances'], // Hilly = air first
+        special_notes: 'Landslide corridors require aerial reconnaissance before ground deployment. Roads may be blocked.'
+    },
+    'darbhanga': {
+        base: { boats: 11, ambulances: 6, helicopters: 2, personnel: 85, relief_kits: 900, medical_kits: 400 },
+        surge_multiplier: 1.3,
+        terrain_label: 'Riverine Plain (Kamla-Balan Basin)',
+        flood_type: 'River Overflow & Embankment Breach',
+        risk_factors: ['River Overflow', 'Embankment Breach', 'Stagnant Water'],
+        evacuation_advice: 'Relocate to elevated community shelters; avoid embankments',
+        deploy_priorities: ['boats', 'relief_kits', 'personnel'], // Flat = boats first
+        special_notes: 'Monitor Kamla embankment breach points. Stagnant water zones need water purification kits.'
+    },
+    'dhemaji': {
+        base: { boats: 16, ambulances: 5, helicopters: 3, personnel: 115, relief_kits: 800, medical_kits: 350 },
+        surge_multiplier: 1.4,
+        terrain_label: 'Brahmaputra Floodplain',
+        flood_type: 'Sheet Flooding & Bank Erosion',
+        risk_factors: ['River Swell', 'Bank Erosion', 'Widespread Sheet Flooding'],
+        evacuation_advice: 'Move to raised platforms (Chang Ghars) or designated high ground',
+        deploy_priorities: ['boats', 'helicopters', 'relief_kits'], // Floodplain = boats + air
+        special_notes: 'Activate Chang Ghar (raised platform) network. Riverbank erosion may isolate communities.'
+    }
+};
+
+const SAFE_HAVEN_DATA = {
+    'wayanad_meppadi': [
+        { name: 'Meppadi Community Hospital', type: 'hospital', capacity: 200, elevation: 850, helipad: true },
+        { name: 'Meppadi Higher Secondary School', type: 'shelter', capacity: 500, elevation: 820, helipad: false },
+        { name: 'Chooralmala Ridge Point', type: 'high_ground', capacity: 150, elevation: 920, helipad: false },
+        { name: 'Meppadi Temple Complex', type: 'shelter', capacity: 300, elevation: 810, helipad: false },
+        { name: 'NH-766 Elevated Bridge', type: 'high_ground', capacity: 100, elevation: 880, helipad: false }
+    ],
+    'darbhanga': [
+        { name: 'Darbhanga Medical College', type: 'hospital', capacity: 400, elevation: 58, helipad: true },
+        { name: 'Darbhanga Raj Fort', type: 'shelter', capacity: 600, elevation: 55, helipad: false },
+        { name: 'Kamla Embankment High Point', type: 'high_ground', capacity: 200, elevation: 62, helipad: false },
+        { name: 'LN Mithila University Campus', type: 'shelter', capacity: 800, elevation: 56, helipad: false },
+        { name: 'NH-57 Elevated Section', type: 'high_ground', capacity: 150, elevation: 60, helipad: false }
+    ],
+    'dhemaji': [
+        { name: 'Dhemaji Civil Hospital', type: 'hospital', capacity: 150, elevation: 82, helipad: true },
+        { name: 'Dhemaji College Complex', type: 'shelter', capacity: 400, elevation: 78, helipad: false },
+        { name: 'Jonai Highland Area', type: 'high_ground', capacity: 250, elevation: 95, helipad: false },
+        { name: 'Dhemaji DC Office', type: 'shelter', capacity: 200, elevation: 76, helipad: false },
+        { name: 'Simen Chapori Raised Platform', type: 'high_ground', capacity: 100, elevation: 88, helipad: false }
+    ]
+};
+
 /**
  * Consolidates optimization logic and updates UI/Map
- */
-/**
- * Consolidates optimization logic and updates UI/Map
- * IMPROVED: Safety-linked, risk-prioritized, and stoppable
+ * IMPROVED: Village-specific inventories, multi-phase deployment, stoppable
  */
 async function optimizeAllocation() {
     // 0. Verification: Optimization requires active rainfall simulation
@@ -4352,15 +4409,29 @@ async function optimizeAllocation() {
         });
     });
 
-    // 3. INVENTORY MOBILIZATION (Available Resources — village-terrain scaled)
-    const available = {
-        'ambulances': Math.round((5 + intensity * 12) * (tMult.ambulances || 1)),
-        'boats': Math.round((3 + intensity * 20) * (tMult.boats || 1)),
-        'helicopters': Math.round((1 + intensity * 6) * (tMult.helicopters || 1)),
-        'relief_kits': Math.round(400 + intensity * 1500),
-        'personnel': Math.round(25 + intensity * 80),
-        'medical_kits': Math.round((80 + intensity * 400) * (tMult.medical_kits || 1))
-    };
+    // 3. INVENTORY MOBILIZATION (Village-specific real inventory + surge scaling)
+    const villageInv = VILLAGE_RESOURCE_INVENTORY[villageId] || VILLAGE_RESOURCE_INVENTORY['wayanad_meppadi'];
+    const surgeScale = 1 + (intensity * (villageInv.surge_multiplier - 1)); // Scale between 1x and surge_multiplier
+    const available = {};
+    allResourceKeys.forEach(res => {
+        const baseAmt = villageInv.base[res] || 0;
+        available[res] = Math.round(baseAmt * surgeScale);
+    });
+
+    // Safe haven capacity assessment
+    const safeHavens = SAFE_HAVEN_DATA[villageId] || [];
+    const totalShelterCapacity = safeHavens.reduce((s, h) => s + h.capacity, 0);
+    const totalAffectedPop = missions.reduce((s, m) => s + m.pop, 0);
+    const shelterUtilization = totalAffectedPop > 0 ? Math.min(1, totalShelterCapacity / totalAffectedPop) : 1;
+
+    // If shelter capacity is high, reduce ambulance demand (people can self-evacuate to nearby shelters)
+    if (shelterUtilization > 0.6) {
+        missions.forEach(m => {
+            m.required.ambulances = Math.max(1, Math.round(m.required.ambulances * (1 - shelterUtilization * 0.3)));
+        });
+        // Recalculate ambulance demand
+        totalDemand.ambulances = missions.reduce((s, m) => s + m.required.ambulances, 0);
+    }
 
     if (!appState.isOptimizing) return;
     await new Promise(r => setTimeout(r, 800)); // Processing mid-delay
@@ -4399,7 +4470,30 @@ async function optimizeAllocation() {
     // Re-sort final mission list by calculated Utility Score for display
     missions.sort((a, b) => b.priority_score - a.priority_score);
 
-    // 5. FINALIZE AND UPDATE UI
+    // 5. MULTI-PHASE DEPLOYMENT SEQUENCING
+    const deploymentPhases = {
+        phase1: { name: 'IMMEDIATE RESPONSE', timeframe: '0-4 hours', missions: [], color: '#ef4444', badge: '🔴' },
+        phase2: { name: 'SHORT-TERM RELIEF', timeframe: '4-12 hours', missions: [], color: '#f59e0b', badge: '🟡' },
+        phase3: { name: 'SUSTAINED OPERATIONS', timeframe: '12-24 hours', missions: [], color: '#22c55e', badge: '🟢' }
+    };
+
+    missions.forEach(m => {
+        const missionData = {
+            name: m.name, coords: m.coords, risk: m.risk, pop: m.pop,
+            time_min: m.time_min, hub_name: m.hub_name,
+            urgency: m.urgency || 'MODERATE',
+            requirements: { ...m.required }, allocations: { ...m.allocated }
+        };
+        if (m.urgency === 'CRITICAL') {
+            deploymentPhases.phase1.missions.push(missionData);
+        } else if (m.urgency === 'URGENT') {
+            deploymentPhases.phase2.missions.push(missionData);
+        } else {
+            deploymentPhases.phase3.missions.push(missionData);
+        }
+    });
+
+    // 6. FINALIZE AND UPDATE UI
     if (!appState.isOptimizing) return;
 
     const allocations = {};
@@ -4411,6 +4505,7 @@ async function optimizeAllocation() {
         time_min: m.time_min,
         hub_name: m.hub_name,
         urgency: m.urgency || 'MODERATE',
+        phase: m.urgency === 'CRITICAL' ? 'Phase 1' : (m.urgency === 'URGENT' ? 'Phase 2' : 'Phase 3'),
         requirements: m.required,
         allocations: m.allocated
     }));
@@ -4425,6 +4520,7 @@ async function optimizeAllocation() {
             time_min: m.time_min,
             risk: m.risk,
             urgency: m.urgency || 'MODERATE',
+            phase: m.urgency === 'CRITICAL' ? 'Phase 1' : (m.urgency === 'URGENT' ? 'Phase 2' : 'Phase 3'),
             allocated_amt: m.allocated[res],
             required_amt: m.required[res]
         }));
@@ -4442,13 +4538,25 @@ async function optimizeAllocation() {
 
     const plan = {
         village_id: villageId,
+        village_profile: villageInv,
         centers: centers,
+        safe_havens: safeHavens,
+        shelter_capacity: totalShelterCapacity,
+        shelter_utilization: shelterUtilization,
+        available_resources: available,
         resource_allocations: allocations,
         mission_summaries: missionSummaries.sort((a, b) => b.risk - a.risk),
+        deployment_phases: deploymentPhases,
         estimated_coverage: allocations,
-        efficiency_score: Math.round(Object.values(allocations).reduce((s, a) => s + a.percentage, 0) / 4),
-        recommendations: generateDynamicRecommendations(allocations, intensity)
+        efficiency_score: Math.round(Object.values(allocations).reduce((s, a) => s + a.percentage, 0) / allResourceKeys.length),
+        recommendations: generateDynamicRecommendations(allocations, intensity, villageId),
+        rainfall_mm: appState.rainfallAmount,
+        intensity: intensity,
+        timestamp: new Date().toISOString()
     };
+
+    // Cache the plan for deployment report generation
+    appState.lastDeploymentPlan = plan;
 
     appState.isOptimizing = false;
     resetOptimizationUI();
@@ -4469,6 +4577,182 @@ function stopOptimization() {
 }
 
 /**
+ * Generates a downloadable tactical deployment report (.txt)
+ * Uses the cached plan from the last optimization run
+ */
+function generateDeploymentReport() {
+    const plan = appState.lastDeploymentPlan;
+    if (!plan) {
+        showToast('No Plan Available', 'Run the optimization first to generate a deployment plan.', 'warning');
+        return;
+    }
+
+    const villageNames = {
+        'wayanad_meppadi': 'Meppadi, Wayanad, Kerala',
+        'darbhanga': 'Darbhanga, Bihar',
+        'dhemaji': 'Dhemaji, Assam'
+    };
+    const villageName = villageNames[plan.village_id] || plan.village_id;
+    const profile = plan.village_profile || {};
+    const allResKeys = ['ambulances', 'boats', 'helicopters', 'personnel', 'relief_kits', 'medical_kits'];
+    const resLabels = {
+        ambulances: 'Ambulances', boats: 'Rescue Boats', helicopters: 'Helicopters',
+        personnel: 'Personnel', relief_kits: 'Relief Kits', medical_kits: 'Medical Kits'
+    };
+
+    const sep = '═══════════════════════════════════════════════════════════════════════════';
+    const dash = '───────────────────────────────────────────────────────────────────────────';
+
+    const lines = [];
+    const add = (...args) => args.forEach(l => lines.push(l));
+
+    // HEADER
+    add(sep);
+    add('             JAL DRISHTI — TACTICAL RESOURCE DEPLOYMENT REPORT');
+    add(sep);
+    add('');
+    add(`Generated:       ${new Date().toLocaleString()}`);
+    add(`Location:        ${villageName}`);
+    add(`Terrain:         ${profile.terrain_label || 'Unknown'}`);
+    add(`Flood Type:      ${profile.flood_type || 'Unknown'}`);
+    add(`Rainfall Input:  ${plan.rainfall_mm || 0} mm`);
+    add(`Risk Intensity:  ${((plan.intensity || 0) * 100).toFixed(0)}%`);
+    add(`Efficiency:      ${plan.efficiency_score || 0}%`);
+    add('');
+
+    // VILLAGE PROFILE
+    add(dash);
+    add('  SECTION 1: VILLAGE TERRAIN PROFILE');
+    add(dash);
+    add('');
+    add(`  Terrain Type:       ${profile.terrain_label || '--'}`);
+    add(`  Flood Type:         ${profile.flood_type || '--'}`);
+    add(`  Risk Factors:       ${(profile.risk_factors || []).join(', ')}`);
+    add(`  Evacuation Advice:  ${profile.evacuation_advice || '--'}`);
+    add(`  Deploy Priorities:  ${(profile.deploy_priorities || []).map(r => resLabels[r] || r).join(' → ')}`);
+    add(`  Special Notes:      ${profile.special_notes || '--'}`);
+    add('');
+
+    // RESOURCE INVENTORY
+    add(dash);
+    add('  SECTION 2: RESOURCE INVENTORY (Available vs Required)');
+    add(dash);
+    add('');
+    add(`  ${'Resource'.padEnd(18)} ${'Available'.padStart(10)} ${'Required'.padStart(10)} ${'Allocated'.padStart(10)} ${'Coverage'.padStart(10)}`);
+    add(`  ${'─'.repeat(18)} ${'─'.repeat(10)} ${'─'.repeat(10)} ${'─'.repeat(10)} ${'─'.repeat(10)}`);
+    allResKeys.forEach(res => {
+        const alloc = plan.resource_allocations[res] || {};
+        const avail = (plan.available_resources || {})[res] || 0;
+        add(`  ${(resLabels[res] || res).padEnd(18)} ${String(avail).padStart(10)} ${String(alloc.required || 0).padStart(10)} ${String(alloc.allocated || 0).padStart(10)} ${(alloc.percentage || 0) + '%'.padStart(9)}`);
+    });
+    add('');
+
+    // SAFE HAVEN STATUS
+    add(dash);
+    add('  SECTION 3: SAFE HAVEN STATUS');
+    add(dash);
+    add('');
+    add(`  Total Shelter Capacity:   ${(plan.shelter_capacity || 0).toLocaleString()} people`);
+    add(`  Shelter Utilization:      ${((plan.shelter_utilization || 0) * 100).toFixed(0)}%`);
+    add('');
+    add(`  ${'Haven Name'.padEnd(35)} ${'Type'.padEnd(14)} ${'Capacity'.padStart(10)} ${'Helipad'.padStart(8)}`);
+    add(`  ${'─'.repeat(35)} ${'─'.repeat(14)} ${'─'.repeat(10)} ${'─'.repeat(8)}`);
+    (plan.safe_havens || []).forEach(h => {
+        add(`  ${h.name.padEnd(35)} ${h.type.padEnd(14)} ${String(h.capacity).padStart(10)} ${(h.helipad ? 'YES' : 'NO').padStart(8)}`);
+    });
+    add('');
+
+    // CLUSTER-WISE ALLOCATION TABLE
+    add(dash);
+    add('  SECTION 4: CLUSTER-WISE RESOURCE ALLOCATION');
+    add(dash);
+    add('');
+    const missions = plan.mission_summaries || [];
+    if (missions.length === 0) {
+        add('  No active mission clusters detected.');
+    } else {
+        missions.forEach((m, i) => {
+            const riskLabel = m.risk > 0.7 ? 'EXTREME' : (m.risk > 0.4 ? 'HIGH' : (m.risk > 0.2 ? 'MEDIUM' : 'LOW'));
+            add(`  ── Mission ${i + 1}: ${m.name} ──`);
+            add(`     Phase:        ${m.phase || '--'}`);
+            add(`     Urgency:      ${m.urgency || '--'}`);
+            add(`     Risk Level:   ${riskLabel} (${(m.risk * 100).toFixed(0)}%)`);
+            add(`     Population:   ${(m.pop || 0).toLocaleString()}`);
+            add(`     Staging Hub:  ${m.hub_name || '--'}`);
+            add(`     ETA:          ${m.time_min || '--'} minutes`);
+            add('     Resources:');
+            allResKeys.forEach(res => {
+                const req = (m.requirements || {})[res] || 0;
+                const alc = (m.allocations || {})[res] || 0;
+                if (req > 0 || alc > 0) {
+                    const status = alc >= req ? '✓ FULL' : (alc > 0 ? '⚠ PARTIAL' : '✗ NONE');
+                    add(`       ${(resLabels[res] || res).padEnd(16)} Needed: ${String(req).padStart(4)}  |  Allocated: ${String(alc).padStart(4)}  [${status}]`);
+                }
+            });
+            add('');
+        });
+    }
+
+    // PHASED DEPLOYMENT SCHEDULE
+    add(dash);
+    add('  SECTION 5: PHASED DEPLOYMENT SCHEDULE');
+    add(dash);
+    add('');
+    const phases = plan.deployment_phases || {};
+    Object.entries(phases).forEach(([key, phase]) => {
+        const totalPop = phase.missions.reduce((s, m) => s + (m.pop || 0), 0);
+        add(`  ${phase.badge || '●'} ${phase.name} (${phase.timeframe})`);
+        add(`     Clusters: ${phase.missions.length}   |   Population: ${totalPop.toLocaleString()}`);
+        if (phase.missions.length > 0) {
+            phase.missions.forEach(m => {
+                add(`     → ${m.name} (${m.urgency}, Pop: ${(m.pop || 0).toLocaleString()}, Risk: ${((m.risk || 0) * 100).toFixed(0)}%)`);
+            });
+        } else {
+            add('     → No clusters in this phase');
+        }
+        add('');
+    });
+
+    // RESCUE HUBS
+    add(dash);
+    add('  SECTION 6: RESCUE HUB STAGING LOCATIONS');
+    add(dash);
+    add('');
+    (plan.centers || []).forEach(c => {
+        add(`  • ${c.name}`);
+        add(`    Type: ${c.type.toUpperCase()}  |  Coordinates: ${c.lat.toFixed(3)}°N, ${c.lon.toFixed(3)}°E`);
+    });
+    add('');
+
+    // RECOMMENDATIONS
+    add(dash);
+    add('  SECTION 7: TACTICAL RECOMMENDATIONS');
+    add(dash);
+    add('');
+    (plan.recommendations || []).forEach(rec => {
+        add(`  [${rec.type}] ${rec.message}`);
+    });
+    add('');
+
+    // FOOTER
+    add(sep);
+    add('         Report generated by Jal Drishti Mission Control v2.0');
+    add('         AI-Driven Flood Intelligence & Tactical Support System');
+    add(sep);
+
+    const reportText = lines.join('\n');
+    const blob = new Blob([reportText], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `JalDrishti_DeploymentReport_${plan.village_id}_${new Date().toISOString().slice(0, 10)}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    showToast('Deployment Report Downloaded', `Tactical report for ${villageName} saved successfully.`, 'success');
+}
+
+/**
  * Resets the UI button states for optimization
  */
 function resetOptimizationUI() {
@@ -4478,19 +4762,54 @@ function resetOptimizationUI() {
     if (btnStop) btnStop.style.display = 'none';
 }
 
-function generateDynamicRecommendations(allocations, intensity) {
+function generateDynamicRecommendations(allocations, intensity, villageId) {
     const recs = [];
+
+    // General shortage alerts
     if (allocations.boats.percentage < 40 && intensity > 0.6) {
         recs.push({ type: 'CRITICAL', message: `Severe boat shortage! Requesting NDRF support for riverside clusters.` });
     }
     if (allocations.ambulances.percentage < 60) {
-        recs.push({ type: 'WARNING', message: 'Medical response saturation detected. Prioritizing centers.' });
+        recs.push({ type: 'WARNING', message: 'Medical response saturation detected. Prioritizing trauma centers.' });
+    }
+    if (allocations.helicopters && allocations.helicopters.percentage < 30 && intensity > 0.5) {
+        recs.push({ type: 'CRITICAL', message: 'Helicopter fleet insufficient. Request IAF standby for aerial evacuation.' });
     }
     if (intensity > 0.85) {
         recs.push({ type: 'CAUTION', message: 'Aerial reconnaissance required for isolated zones.' });
-    } else {
-        recs.push({ type: 'INFO', message: 'Resource distribution optimized for current conditions.' });
     }
+
+    // Village-specific terrain alerts
+    if (villageId === 'wayanad_meppadi') {
+        if (intensity > 0.4) {
+            recs.push({ type: 'WARNING', message: '⛰️ LANDSLIDE ALERT: Chooralmala–Mundakkai corridor requires immediate aerial scanning. Ground routes may be severed.' });
+        }
+        if (intensity > 0.7) {
+            recs.push({ type: 'CRITICAL', message: '🚁 Activate helicopter staging at Meppadi Hospital helipad. Valley floor evacuations require airlift.' });
+        }
+        recs.push({ type: 'INFO', message: 'Hilly terrain prioritizes helicopter and medical kit deployment over ground vehicles.' });
+    } else if (villageId === 'darbhanga') {
+        if (intensity > 0.5) {
+            recs.push({ type: 'WARNING', message: '🌊 EMBANKMENT WATCH: Monitor Kamla river embankment breach points. Deploy sandbag teams to vulnerable sections.' });
+        }
+        if (intensity > 0.7) {
+            recs.push({ type: 'CRITICAL', message: '🚤 Activate all SDRF boat units. Stagnant water zones need water purification kits within 12 hours.' });
+        }
+        recs.push({ type: 'INFO', message: 'Riverine terrain prioritizes boat deployment and community shelter activation.' });
+    } else if (villageId === 'dhemaji') {
+        if (intensity > 0.3) {
+            recs.push({ type: 'WARNING', message: '🏠 CHANG GHAR ALERT: Activate raised platform (Chang Ghar) network for immediate local sheltering across floodplain.' });
+        }
+        if (intensity > 0.6) {
+            recs.push({ type: 'CRITICAL', message: '🏞️ BANK EROSION: Brahmaputra riverbank erosion may isolate Simen Chapori. Deploy Army boats for emergency linkage.' });
+        }
+        recs.push({ type: 'INFO', message: 'Floodplain terrain requires maximum boat fleet with aerial backup for isolated communities.' });
+    }
+
+    if (recs.filter(r => r.type === 'CRITICAL' || r.type === 'WARNING').length === 0) {
+        recs.push({ type: 'INFO', message: '✅ Resource distribution optimized for current conditions. All clusters covered.' });
+    }
+
     return recs;
 }
 
@@ -4518,14 +4837,17 @@ function updateResourceStats(plan) {
         </div>
     `).join('');
 
-    // 2. Update Mission List
+    // 2. Update Mission List with Phase Badges
     const missionContainer = document.getElementById('deployment-missions');
     if (missionContainer) {
-        const missions = plan.mission_summaries.slice(0, 10);
+        const missions = plan.mission_summaries.slice(0, 12);
 
         if (missions.length === 0) {
             missionContainer.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:0.7rem;">No urgent missions required</div>';
         } else {
+            const phaseBadgeColors = { 'Phase 1': '#ef4444', 'Phase 2': '#f59e0b', 'Phase 3': '#22c55e' };
+            const phaseIcons = { 'Phase 1': '🔴', 'Phase 2': '🟡', 'Phase 3': '🟢' };
+
             missionContainer.innerHTML = missions.map(m => {
                 const resDetails = Object.keys(icons).map(res => {
                     const req = m.requirements[res] || 0;
@@ -4539,18 +4861,27 @@ function updateResourceStats(plan) {
                     `;
                 }).join('');
 
+                const phase = m.phase || 'Phase 3';
+                const pColor = phaseBadgeColors[phase] || '#22c55e';
+                const pIcon = phaseIcons[phase] || '🟢';
+
                 return `
-                    <div class="mission-card" style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.05); cursor:pointer;" onclick="focusOnMission([${m.coords}])">
+                    <div class="mission-card" style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.05); cursor:pointer; border-left:3px solid ${pColor};" onclick="focusOnMission([${m.coords}])">
                         <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:5px;">
                             <div>
-                                <div style="font-size:0.75rem; font-weight:600; color:var(--text-bright)">${m.name}</div>
+                                <div style="display:flex; align-items:center; gap:6px;">
+                                    <span style="font-size:0.55rem; background:${pColor}22; color:${pColor}; padding:1px 6px; border-radius:8px; border:1px solid ${pColor}44; font-weight:700;">${pIcon} ${phase}</span>
+                                    <span style="font-size:0.55rem; background:rgba(255,255,255,0.05); color:var(--text-muted); padding:1px 5px; border-radius:4px;">${m.urgency}</span>
+                                </div>
+                                <div style="font-size:0.75rem; font-weight:600; color:var(--text-bright); margin-top:3px;">${m.name}</div>
                                 <div style="font-size:0.6rem; color:var(--accent-secondary)">Hub: ${m.hub_name}</div>
                             </div>
                             <div style="text-align:right">
                                 <div style="font-size:0.7rem; font-weight:700; color:var(--accent-primary)">ETA: ${m.time_min}M</div>
+                                <div style="font-size:0.55rem; color:var(--text-muted)">Pop: ${m.pop.toLocaleString()}</div>
                             </div>
                         </div>
-                        <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:4px;">
+                        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:4px;">
                             ${resDetails}
                         </div>
                     </div>
@@ -4559,10 +4890,27 @@ function updateResourceStats(plan) {
         }
     }
 
+    // 3. Phase Summary Bar
+    if (plan.deployment_phases) {
+        const phaseBar = document.getElementById('deployment-phase-summary');
+        if (phaseBar) {
+            const phases = plan.deployment_phases;
+            phaseBar.innerHTML = Object.entries(phases).map(([key, phase]) => `
+                <div style="display:flex; align-items:center; gap:6px; padding:6px 8px; background:rgba(255,255,255,0.03); border-radius:6px; border-left:3px solid ${phase.color};">
+                    <span style="font-size:0.8rem;">${phase.badge}</span>
+                    <div>
+                        <div style="font-size:0.6rem; font-weight:700; color:${phase.color};">${phase.name}</div>
+                        <div style="font-size:0.55rem; color:var(--text-muted);">${phase.timeframe} • ${phase.missions.length} clusters</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+    }
+
     const recsContainer = document.getElementById('deployment-recommendations');
     if (recsContainer) {
         recsContainer.innerHTML = plan.recommendations.map(rec => `
-            <div class="alert-sm ${rec.type === 'CRITICAL' ? 'alert-danger' : (rec.type === 'WARNING' ? 'alert-warning' : 'alert-info')}" style="margin-top:8px;">
+            <div class="alert-sm ${rec.type === 'CRITICAL' ? 'alert-danger' : (rec.type === 'WARNING' ? 'alert-warning' : (rec.type === 'CAUTION' ? 'alert-warning' : 'alert-info'))}" style="margin-top:8px;">
                 <strong>${rec.type}:</strong> ${rec.message}
             </div>
         `).join('');

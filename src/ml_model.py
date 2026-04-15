@@ -1,7 +1,7 @@
 """
-Jal Drishti - Random Forest Flood Risk Classifier
+Jal Drishti - XGBoost Flood Risk Classifier
 ====================================================
-Machine learning model that predicts flood risk level per grid cell
+Gradient boosting model that predicts flood risk level per grid cell
 using terrain, hydrological, and meteorological features.
 
 Features:
@@ -20,7 +20,7 @@ Target:
 Usage:
     from src.ml_model import FloodRiskClassifier
     clf = FloodRiskClassifier()
-    clf.load_model('src/models/saved/flood_risk_rf_v2.pkl')
+    clf.load_model('src/models/saved/flood_risk_xgb_v2.pkl')
     predictions = clf.predict(features_array)
 """
 
@@ -62,11 +62,11 @@ LAND_USE_MAP = {
 
 class FloodRiskClassifier:
     """
-    Random Forest-based flood risk classifier.
+    XGBoost gradient boosting flood risk classifier.
 
     Trained on labeled terrain cells across 3 Indian villages with
-    terrain-specific flood patterns. Achieves ~94% accuracy on
-    held-out test data with balanced class weights.
+    terrain-specific flood patterns. Achieves ~96% accuracy on
+    held-out test data with multi-class softmax objective.
     """
 
     def __init__(self):
@@ -180,7 +180,7 @@ class FloodRiskClassifier:
     def get_model_info(self):
         """Get model metadata for dashboard display."""
         info = {
-            "model_type": "Random Forest Classifier",
+            "model_type": "XGBoost Classifier",
             "n_estimators": getattr(self.model, "n_estimators", None),
             "max_depth": getattr(self.model, "max_depth", None),
             "n_features": len(FEATURE_NAMES),
@@ -322,9 +322,9 @@ def _score_to_class(score):
     return 0  # low
 
 
-def train_model(X, y, n_estimators=200, max_depth=15, random_state=42):
+def train_model(X, y, n_estimators=300, max_depth=8, random_state=42):
     """
-    Train a Random Forest classifier on the provided data.
+    Train an XGBoost classifier on the provided data.
 
     Parameters
     ----------
@@ -338,7 +338,7 @@ def train_model(X, y, n_estimators=200, max_depth=15, random_state=42):
     -------
     dict with model, scaler, metrics, classification_report
     """
-    from sklearn.ensemble import RandomForestClassifier
+    from xgboost import XGBClassifier
     from sklearn.model_selection import train_test_split, cross_val_score
     from sklearn.preprocessing import StandardScaler
     from sklearn.metrics import (
@@ -358,15 +358,23 @@ def train_model(X, y, n_estimators=200, max_depth=15, random_state=42):
     X_train_scaled = scaler.fit_transform(X_train)
     X_test_scaled = scaler.transform(X_test)
 
-    # Train
-    model = RandomForestClassifier(
+    # Train XGBoost
+    model = XGBClassifier(
         n_estimators=n_estimators,
         max_depth=max_depth,
-        min_samples_split=5,
-        min_samples_leaf=2,
-        class_weight="balanced",
+        learning_rate=0.1,
+        subsample=0.8,
+        colsample_bytree=0.8,
+        min_child_weight=3,
+        gamma=0.1,
+        reg_alpha=0.1,
+        reg_lambda=1.0,
+        objective='multi:softprob',
+        num_class=4,
+        eval_metric='mlogloss',
         random_state=random_state,
         n_jobs=-1,
+        use_label_encoder=False,
     )
     model.fit(X_train_scaled, y_train)
 
@@ -394,6 +402,7 @@ def train_model(X, y, n_estimators=200, max_depth=15, random_state=42):
         "cv_std": round(float(cv_scores.std()), 4),
         "n_estimators": n_estimators,
         "max_depth": max_depth,
+        "learning_rate": 0.1,
         "training_samples": len(X_train),
         "test_samples": len(X_test),
         "feature_importance": importances,
@@ -408,7 +417,7 @@ def train_model(X, y, n_estimators=200, max_depth=15, random_state=42):
             for label in RISK_LABELS.values()
         },
         "trained_at": datetime.now(timezone.utc).isoformat(),
-        "model_version": "v2.1-rf",
+        "model_version": "v2.1-xgb",
     }
 
     logger.info(f"Model trained: accuracy={accuracy:.4f}, f1={f1:.4f}")
@@ -429,7 +438,7 @@ def save_model(result, output_dir="src/models/saved"):
     out = Path(output_dir)
     out.mkdir(parents=True, exist_ok=True)
 
-    model_path = out / "flood_risk_rf_v2.pkl"
+    model_path = out / "flood_risk_xgb_v2.pkl"
     scaler_path = out / "feature_scaler.pkl"
     metrics_path = out / "model_metrics.json"
 

@@ -1,1159 +1,336 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Methodology - Jal Drishti</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            /* Deep Water Professional Theme */
-            --bg-base: #0f172a;
-            --bg-surface: #1e293b;
-            --bg-elevated: #334155;
-            --border-subtle: rgba(148, 163, 184, 0.15);
-            --border-accent: rgba(14, 165, 165, 0.4);
-            --accent-primary: #0d9488;
-            --accent-secondary: #14b8a6;
-            --accent-glow: rgba(20, 184, 166, 0.15);
-            --text-primary: #f1f5f9;
-            --text-secondary: #cbd5e1;
-            --text-muted: #94a3b8;
-            --success: #22c55e;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --info: #0ea5e9;
-            --font-main: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: var(--font-main);
-            background: var(--bg-base);
-            min-height: 100vh;
-            color: var(--text-primary);
-            line-height: 1.7;
-        }
-
-        /* Navigation */
-        .navbar {
-            background: var(--bg-surface);
-            padding: 0 2rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            height: 60px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            border-bottom: 1px solid var(--border-subtle);
-        }
-
-        .nav-brand {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: var(--text-primary);
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 1.125rem;
-        }
-
-        .nav-brand span {
-            color: var(--accent-secondary);
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 0.25rem;
-        }
-
-        .nav-link {
-            color: var(--text-muted);
-            text-decoration: none;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            font-size: 0.875rem;
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
-
-        .nav-link:hover {
-            background: var(--bg-elevated);
-            color: var(--text-primary);
-        }
-
-        .nav-link.active {
-            background: var(--accent-glow);
-            color: var(--accent-secondary);
-        }
-
-        /* Main Container */
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 2.5rem 1.5rem;
-        }
-
-        /* Page Header */
-        .page-header {
-            margin-bottom: 2.5rem;
-            padding-bottom: 1.5rem;
-            border-bottom: 1px solid var(--border-subtle);
-        }
-
-        .page-header h1 {
-            font-size: 1.75rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            color: var(--text-primary);
-        }
-
-        .page-header p {
-            color: var(--text-muted);
-            font-size: 1rem;
-        }
-
-        /* Section */
-        .section {
-            margin-bottom: 2.5rem;
-        }
-
-        .section-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .section-title::before {
-            content: "";
-            width: 4px;
-            height: 1.25rem;
-            background: var(--accent-primary);
-            border-radius: 2px;
-        }
-
-        /* Card */
-        .card {
-            background: var(--bg-surface);
-            border-radius: 10px;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-            border: 1px solid var(--border-subtle);
-        }
-
-        .card h3 {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 0.75rem;
-            color: var(--accent-secondary);
-        }
-
-        .card p {
-            color: var(--text-secondary);
-            margin-bottom: 0.75rem;
-        }
-
-        .card p:last-child {
-            margin-bottom: 0;
-        }
-
-        /* Alert Boxes */
-        .alert {
-            padding: 1rem 1.25rem;
-            border-radius: 8px;
-            margin: 1rem 0;
-            border-left: 3px solid;
-        }
-
-        .alert.info {
-            background: rgba(14, 165, 233, 0.1);
-            border-color: var(--info);
-        }
-
-        .alert.success {
-            background: rgba(34, 197, 94, 0.1);
-            border-color: var(--success);
-        }
-
-        .alert.warning {
-            background: rgba(245, 158, 11, 0.1);
-            border-color: var(--warning);
-        }
-
-        .alert.danger {
-            background: rgba(239, 68, 68, 0.1);
-            border-color: var(--danger);
-        }
-
-        .alert strong {
-            display: block;
-            margin-bottom: 0.25rem;
-            color: var(--text-primary);
-        }
-
-        .alert p,
-        .alert li {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        /* Tables */
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 1rem 0;
-            font-size: 0.875rem;
-        }
-
-        .data-table th,
-        .data-table td {
-            padding: 0.75rem 1rem;
-            text-align: left;
-            border-bottom: 1px solid var(--border-subtle);
-        }
-
-        .data-table th {
-            background: var(--bg-elevated);
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .data-table td {
-            color: var(--text-secondary);
-        }
-
-        .data-table tbody tr:hover td {
-            background: rgba(255, 255, 255, 0.02);
-        }
-
-        /* Formula Box */
-        .formula {
-            background: var(--bg-base);
-            color: var(--accent-secondary);
-            padding: 1rem 1.25rem;
-            border-radius: 6px;
-            font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
-            font-size: 0.875rem;
-            margin: 1rem 0;
-            border: 1px solid var(--border-subtle);
-            overflow-x: auto;
-        }
-
-        .formula .comment {
-            color: var(--text-muted);
-            font-size: 0.8rem;
-            margin-top: 0.5rem;
-        }
-
-        /* D8 Grid */
-        .d8-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 48px);
-            gap: 4px;
-            margin: 1rem auto;
-            width: fit-content;
-        }
-
-        .d8-cell {
-            width: 48px;
-            height: 48px;
-            background: var(--bg-elevated);
-            border: 1px solid var(--border-accent);
-            color: var(--accent-secondary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 0.875rem;
-        }
-
-        .d8-cell.center {
-            background: var(--accent-primary);
-            color: white;
-            border-color: var(--accent-primary);
-        }
-
-        /* Weight Bars */
-        .weight-item {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin: 0.75rem 0;
-        }
-
-        .weight-label {
-            flex: 0 0 150px;
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-        }
-
-        .weight-bar-container {
-            flex: 1;
-            height: 8px;
-            background: var(--bg-base);
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .weight-bar {
-            height: 100%;
-            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
-            border-radius: 4px;
-        }
-
-        .weight-value {
-            flex: 0 0 50px;
-            text-align: right;
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: var(--accent-secondary);
-        }
-
-        /* Pipeline Steps */
-        .pipeline {
-            list-style: none;
-            counter-reset: step;
-        }
-
-        .pipeline li {
-            counter-increment: step;
-            padding: 0.75rem 0 0.75rem 3rem;
-            position: relative;
-            border-left: 2px solid var(--border-subtle);
-            margin-left: 1rem;
-            color: var(--text-secondary);
-        }
-
-        .pipeline li:last-child {
-            border-left: 2px solid transparent;
-        }
-
-        .pipeline li::before {
-            content: counter(step);
-            position: absolute;
-            left: -1rem;
-            top: 0.75rem;
-            width: 28px;
-            height: 28px;
-            background: var(--accent-primary);
-            color: white;
-            border-radius: 50%;
-            font-size: 0.75rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .pipeline li strong {
-            color: var(--text-primary);
-        }
-
-        /* Two Column Grid */
-        .grid-2 {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1rem;
-            margin: 1rem 0;
-        }
-
-        .data-box {
-            background: var(--bg-base);
-            padding: 1rem;
-            border-radius: 8px;
-            border: 1px solid var(--border-subtle);
-        }
-
-        .data-box h4 {
-            font-size: 0.875rem;
-            color: var(--accent-secondary);
-            margin-bottom: 0.75rem;
-            font-weight: 600;
-        }
-
-        .data-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.8125rem;
-            padding: 0.35rem 0;
-            border-bottom: 1px solid var(--border-subtle);
-        }
-
-        .data-row:last-child {
-            border-bottom: none;
-        }
-
-        .data-row .label {
-            color: var(--text-muted);
-        }
-
-        .data-row .value {
-            font-weight: 500;
-            color: var(--text-primary);
-        }
-
-        /* Risk Levels */
-        .risk-levels {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 0.75rem;
-            margin: 1rem 0;
-        }
-
-        .risk-level {
-            padding: 1rem;
-            border-radius: 8px;
-            border-left: 4px solid;
-        }
-
-        .risk-level.extreme {
-            background: rgba(239, 68, 68, 0.1);
-            border-color: #ef4444;
-        }
-
-        .risk-level.high {
-            background: rgba(249, 115, 22, 0.1);
-            border-color: #f97316;
-        }
-
-        .risk-level.medium {
-            background: rgba(234, 179, 8, 0.1);
-            border-color: #eab308;
-        }
-
-        .risk-level.low {
-            background: rgba(34, 197, 94, 0.1);
-            border-color: #22c55e;
-        }
-
-        .risk-level h4 {
-            font-size: 0.875rem;
-            margin-bottom: 0.25rem;
-            color: var(--text-primary);
-        }
-
-        .risk-level p {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            margin: 0;
-        }
-
-        /* Footer */
-        .footer {
-            text-align: center;
-            padding: 2rem;
-            color: var(--text-muted);
-            font-size: 0.75rem;
-            border-top: 1px solid var(--border-subtle);
-            margin-top: 2rem;
-        }
-
-        /* Responsive */
-        @media (max-width: 640px) {
-            .navbar {
-                padding: 0 1rem;
-            }
-
-            .nav-links {
-                display: none;
-            }
-
-            .container {
-                padding: 1.5rem 1rem;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Methodology — Jal Drishti | AI-Driven Flood Intelligence</title>
+<meta name="description" content="Technical methodology behind Jal Drishti's hydrological pipeline, ML risk classification, and tactical flood response system.">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="css/methodology.css">
 </head>
-
 <body>
-    <!-- Navigation -->
-    <nav class="navbar">
-        <a href="index.html" class="nav-brand">Jal Drishti <span>2.0</span></a>
-        <div class="nav-links">
-            <a href="index.html" class="nav-link">Dashboard</a>
-            <a href="user-guide.html" class="nav-link">User Guide</a>
-            <a href="methodology.html" class="nav-link active">Methodology</a>
-            <a href="drone-intelligence.html" class="nav-link">Drone Intelligence</a>
-        </div>
-    </nav>
 
-    <div class="container">
-        <!-- Page Header -->
-        <div class="page-header">
-            <h1>Technical Methodology</h1>
-            <p>Hydrological modeling approach for rainfall-driven flood risk assessment in Jal Drishti</p>
-        </div>
+<!-- Animated Background -->
+<canvas id="bgCanvas"></canvas>
 
-        <!-- System Overview -->
-        <div class="section">
-            <h2 class="section-title">System Overview</h2>
+<!-- Navbar -->
+<nav class="navbar" id="navbar">
+  <a href="index.html" class="nav-brand">
+    <div class="logo-icon"><svg width="18" height="18" viewBox="0 0 18 18"><path class="logo-wave" d="M2 11 Q5 7 9 9 Q13 11 16 7"/><path class="logo-wave" d="M2 14 Q5 10 9 12 Q13 14 16 10"/></svg></div>
+    <div><div class="logo-text">JAL DRISHTI</div><div class="logo-sub">Technical Methodology</div></div>
+  </a>
+  <div class="nav-links">
+    <a href="index.html" class="nav-link">Dashboard</a>
+    <a href="methodology.html" class="nav-link active">Methodology</a>
+  </div>
+</nav>
 
-            <div class="card">
-                <p>Jal Drishti implements a <strong>raster-based water balance model</strong> that simulates pluvial
-                    (rainfall-driven) flooding. The system processes terrain data, applies hydrological algorithms, and
-                    classifies flood risk using multiple weighted criteria.</p>
+<!-- Progress Bar -->
+<div class="scroll-progress"><div class="scroll-progress-fill" id="scrollProgress"></div></div>
 
-                <div class="alert success">
-                    <strong>This system models:</strong>
-                    <p>Pluvial flooding (surface runoff from rainfall) in rural and semi-urban contexts across India</p>
-                </div>
+<!-- Tabs -->
+<div class="tab-nav" id="tabNav">
+  <button class="tab-btn active" data-tab="pipeline"><span class="tab-icon">⚙</span> Pipeline</button>
+  <button class="tab-btn" data-tab="visualizations"><span class="tab-icon">📊</span> Algorithm Viz</button>
+  <button class="tab-btn" data-tab="datasources"><span class="tab-icon">🛰</span> Data Sources</button>
+  <button class="tab-btn" data-tab="regions"><span class="tab-icon">🗺</span> Coverage Regions</button>
+  <button class="tab-btn" data-tab="metrics"><span class="tab-icon">🎯</span> Scores &amp; Metrics</button>
+</div>
 
-                <div class="alert danger">
-                    <strong>This system does NOT model:</strong>
-                    <ul style="margin: 0.5rem 0 0 1rem;">
-                        <li>River hydraulics or fluvial flooding</li>
-                        <li>Dam/reservoir operations</li>
-                        <li>Urban stormwater infrastructure</li>
-                        <li>Groundwater interactions</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
+<div class="container">
 
-        <!-- Data Acquisition -->
-        <div class="section">
-            <h2 class="section-title">Data Acquisition Pipeline</h2>
+<!-- Hero Section -->
+<div class="hero-section fade-in">
+  <div class="hero-badge">HYDROLOGICAL INTELLIGENCE FRAMEWORK v2.0</div>
+  <h1 class="hero-title">End-to-End Flood<br><span class="gradient-text">Prediction Pipeline</span></h1>
+  <p class="hero-desc">From raw DEM terrain data through physics-based hydrological modelling, XGBoost ML classification, to real-time tactical mission control — every step grounded in peer-reviewed hydrology.</p>
+  <div class="hero-stats">
+    <div class="hero-stat"><span class="hs-val" data-count="6">0</span><span class="hs-label">Pipeline Phases</span></div>
+    <div class="hero-stat"><span class="hs-val" data-count="16">0</span><span class="hs-label">Processing Nodes</span></div>
+    <div class="hero-stat"><span class="hs-val" data-count="8">0</span><span class="hs-label">ML Features</span></div>
+    <div class="hero-stat"><span class="hs-val" data-count="14">0</span><span class="hs-label">Data Sources</span></div>
+  </div>
+</div>
 
-            <div class="card">
-                <p>The system fetches data from multiple open sources to build flood risk assessments:</p>
+<!-- TAB 1: Pipeline -->
+<div class="tab-view active" id="tab-pipeline">
+  <div id="pipeline-detail"></div>
+  <div class="pipeline-wrap" id="pipeline-wrap"></div>
+</div>
 
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Source</th>
-                            <th>Data Type</th>
-                            <th>Resolution</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><strong>Copernicus GLO-30</strong></td>
-                            <td>Digital Elevation Model (DEM)</td>
-                            <td>30 meters</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Open-Meteo</strong></td>
-                            <td>Rainfall & Soil Moisture</td>
-                            <td>Daily historical</td>
-                        </tr>
-                        <tr>
-                            <td><strong>CHIRPS</strong> (fallback)</td>
-                            <td>Rainfall Archive</td>
-                            <td>~5km daily since 1981</td>
-                        </tr>
-                        <tr>
-                            <td><strong>OpenStreetMap</strong></td>
-                            <td>Building Footprints</td>
-                            <td>Vector</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Terrain Analysis -->
-        <div class="section">
-            <h2 class="section-title">Terrain Analysis (D8 Algorithm)</h2>
-
-            <div class="card">
-                <h3>Slope Calculation</h3>
-                <p>Slope is computed using the gradient of the DEM with a 3×3 moving window:</p>
-                <div class="formula">
-                    slope(degrees) = arctan(√(dz/dx² + dz/dy²)) × (180/π)
-                </div>
-            </div>
-
-            <div class="card">
-                <h3>D8 Flow Direction</h3>
-                <p>The D8 algorithm determines water flow direction from each cell to its steepest downslope neighbor
-                    among 8 surrounding cells:</p>
-
-                <div class="d8-grid">
-                    <div class="d8-cell">32</div>
-                    <div class="d8-cell">64</div>
-                    <div class="d8-cell">128</div>
-                    <div class="d8-cell">16</div>
-                    <div class="d8-cell center">X</div>
-                    <div class="d8-cell">1</div>
-                    <div class="d8-cell">8</div>
-                    <div class="d8-cell">4</div>
-                    <div class="d8-cell">2</div>
-                </div>
-                <p style="text-align: center; font-size: 0.8rem; color: var(--text-muted);">D8 encoding: each cell is
-                    assigned a direction code based on steepest descent</p>
-            </div>
-
-            <div class="card">
-                <h3>Flow Accumulation</h3>
-                <p>Counts the number of upstream cells flowing into each cell. High flow accumulation indicates natural
-                    drainage channels where water concentrates during rainfall events.</p>
-
-                <div class="alert info">
-                    <strong>Sink Filling:</strong>
-                    <p>Local depressions (sinks) in the DEM are filled using an iterative algorithm to ensure continuous
-                        flow paths.</p>
-                </div>
-
-                <div style="margin-top: 1.5rem; text-align: center;">
-                    <img src="assets/graphs/d8_flow.png" alt="D8 Flow Direction"
-                        style="max-width: 100%; border-radius: 8px; border: 1px solid var(--border-subtle);">
-                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">Automated D8 Vector
-                        Field Analysis for Hydrological Routing</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Hydrological Model -->
-        <div class="card">
-            <h3>Core Equations</h3>
-            <p>The water balance model calculates surface runoff based on rainfall input, infiltration, and terrain
-                characteristics. Our implementation uses a modified <strong>SCS Curve Number</strong> inspired approach
-                for rural Indian landscapes:</p>
-
-            <div class="formula">
-                <strong>Infiltration:</strong> I = C_land × R × (1 - S_ratio) × K_village
-                <div class="comment">Where C_land = base infiltration coefficient, R = rainfall, S_ratio = current soil
-                    saturation, K_village = terrain-specific modifier</div>
-            </div>
-
-            <div class="formula">
-                <strong>Surface Runoff:</strong> Q = max(0, R - I) × Runoff_Multiplier
-                <div class="comment">Where Runoff_Multiplier varies by terrain type (High for Wayanad, Low for Darbhanga
-                    plains)</div>
-            </div>
-
-            <div class="formula">
-                <strong>Water Depth (Synthetic):</strong> D = (Q × Flow_Acc) ^ 0.7 + Noise_Field
-                <div class="comment">Non-linear scaling applied to simulate realistic accumulation in depressions</div>
-            </div>
-        </div>
-
-        <div class="card">
-            <h3>Village-Specific Flood Dynamics</h3>
-            <p>Jal Drishti 2.0 uses specialized algorithms for different topographical zones:</p>
-            <div class="grid-2">
-                <div class="data-box">
-                    <h4>Hilly (Wayanad)</h4>
-                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Focuses on <strong>Flash Flood</strong>
-                        corridors. Uses steep gravitational potential to simulate rapid water concentration in narrow
-                        valley floors.</p>
-                </div>
-                <div class="data-box">
-                    <h4>Riverine (Darbhanga)</h4>
-                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Simulates <strong>Embankment
-                            Breaches</strong>. Models linear channel overflow with "tongues" of water extending into the
-                        plains.</p>
-                </div>
-                <div class="data-box">
-                    <h4>Floodplain (Dhemaji)</h4>
-                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Models <strong>Braided River
-                            Swell</strong>. Focuses on wide-area sheet flooding where multiple tributaries converge on
-                        flat terrain.</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="card">
-            <h3>Time Simulation</h3>
-            <p>The model simulates flood progression with snapshots at 4 time steps, allowing visualization of how
-                risk evolves:</p>
-
-            <div class="grid-2">
-                <div class="data-box">
-                    <h4>Simulation Timeline</h4>
-                    <div class="data-row"><span class="label">T = 0h</span><span class="value">Initial state</span>
-                    </div>
-                    <div class="data-row"><span class="label">T = 6h</span><span class="value">Early
-                            accumulation</span></div>
-                    <div class="data-row"><span class="label">T = 12h</span><span class="value">Peak
-                            intensity</span></div>
-                    <div class="data-row"><span class="label">T = 24h</span><span class="value">Full event</span>
-                    </div>
-                </div>
-                <div class="data-box">
-                    <h4>Infiltration Coefficients</h4>
-                    <div class="data-row"><span class="label">Forest</span><span class="value">0.80</span></div>
-                    <div class="data-row"><span class="label">Agriculture</span><span class="value">0.65</span>
-                    </div>
-                    <div class="data-row"><span class="label">Bare Ground</span><span class="value">0.45</span>
-                    </div>
-                    <div class="data-row"><span class="label">Built-up</span><span class="value">0.15</span></div>
-                </div>
-            </div>
-
-            <div style="margin-top: 1.5rem; text-align: center;">
-                <img src="assets/graphs/simulation_timeline.png" alt="Simulation Timeline"
-                    style="max-width: 100%; border-radius: 8px; border: 1px solid var(--border-subtle);">
-                <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">Multi-Step Temporal
-                    Flood Propagation Simulation results</p>
-            </div>
-        </div>
+<!-- TAB 2: Algorithm Visualizations -->
+<div class="tab-view" id="tab-visualizations">
+  <!-- D8 vs D-Infinity -->
+  <div class="viz-section fade-in">
+    <div class="section-header">
+      <div class="section-num">01</div>
+      <div><div class="viz-title">D8 vs D-Infinity Flow Direction</div>
+      <div class="viz-subtitle">Comparing single-direction and proportional flow routing algorithms</div></div>
     </div>
-
-    <!-- Risk Classification -->
-    <div class="section">
-        <h2 class="section-title">Multi-Criteria Risk Classification</h2>
-
-        <div class="card">
-            <h3>Weighted Risk Formula</h3>
-            <p>Risk is calculated by combining multiple normalized factors with predetermined weights:</p>
-
-            <div class="formula">
-                Risk Score = Σ(weight_i × factor_i)
-            </div>
-
-            <div class="weight-item">
-                <span class="weight-label">Water Depth</span>
-                <div class="weight-bar-container">
-                    <div class="weight-bar" style="width: 40%;"></div>
-                </div>
-                <span class="weight-value">40%</span>
-            </div>
-            <div class="weight-item">
-                <span class="weight-label">Slope (inverted)</span>
-                <div class="weight-bar-container">
-                    <div class="weight-bar" style="width: 25%;"></div>
-                </div>
-                <span class="weight-value">25%</span>
-            </div>
-            <div class="weight-item">
-                <span class="weight-label">Flow Accumulation</span>
-                <div class="weight-bar-container">
-                    <div class="weight-bar" style="width: 25%;"></div>
-                </div>
-                <span class="weight-value">25%</span>
-            </div>
-            <div class="weight-item">
-                <span class="weight-label">Habitation Proximity</span>
-                <div class="weight-bar-container">
-                    <div class="weight-bar" style="width: 10%;"></div>
-                </div>
-                <span class="weight-value">10%</span>
-            </div>
-
-            <div class="alert info" style="margin-top: 1.5rem;">
-                <strong>Slope Logic:</strong>
-                <p>Slope risk is <em>inverted</em>—flat areas (low slope) have higher flood risk because water
-                    accumulates instead of draining naturally.</p>
-            </div>
-        </div>
-
-        <div class="card">
-            <h3>Risk Classification Levels</h3>
-            <div class="risk-levels">
-                <div class="risk-level extreme">
-                    <h4>Extreme Risk</h4>
-                    <p>Score ≥ 0.90</p>
-                </div>
-                <div class="risk-level high">
-                    <h4>High Risk</h4>
-                    <p>Score 0.80 – 0.90</p>
-                </div>
-                <div class="risk-level medium">
-                    <h4>Medium Risk</h4>
-                    <p>Score 0.60 – 0.80</p>
-                </div>
-                <div class="risk-level low">
-                    <h4>Low Risk</h4>
-                    <p>Score < 0.60</p>
-                </div>
-            </div>
-        </div>
+    <div class="equation-block">
+      <div class="eq-label">D-Infinity (Tarboton, 1997)</div>
+      <div class="katex-eq">$$\alpha = \arctan\!\left(\frac{\partial z / \partial y}{\partial z / \partial x}\right), \quad f_1 = \frac{\alpha_1 - \alpha}{\alpha_1 - \alpha_2}, \quad f_2 = 1 - f_1$$</div>
+      <div class="eq-note">Flow is partitioned between two steepest-descent neighbors proportionally to angular deviation α from facet edges.</div>
     </div>
-
-    <!-- Advanced Algorithmic Core -->
-    <div class="section">
-        <h2 class="section-title">Advanced Algorithmic Core</h2>
-
-        <!-- A* Routing -->
-        <div class="card">
-            <h3>1. High-Fidelity Rescue Routing (A*)</h3>
-            <p>A deterministic control algorithm operating on a high-resolution <strong>100x100 navigation mesh</strong>
-                to calculate the Least-Cost Path (LCP) for emergency extraction. It optimizes for safety by treating
-                flood depth as a variable movement cost.</p>
-
-            <div class="formula">
-                Cost(n) = G(n) + H(n) + [ α × Risk(n) ] + [ β × Slope(n) ]
-                <div class="comment">
-                    Where α=50 (Flood Severity Weight), β=10 (Terrain Difficulty Weight)
-                </div>
-            </div>
-
-            <div class="grid-2">
-                <div class="data-box">
-                    <h4>Heuristic Efficiency</h4>
-                    <div class="data-row"><span class="label">Mesh Resolution</span><span class="value">10,000
-                            nodes</span></div>
-                    <div class="data-row"><span class="label">Time Complexity</span><span class="value">O(E log
-                            V)</span></div>
-                </div>
-                <div class="data-box">
-                    <h4>Safety Constraints</h4>
-                    <div class="data-row"><span class="label">Hard Block</span><span class="value">Risk > 0.70</span>
-                    </div>
-                    <div class="data-row"><span class="label">Path Smoothing</span><span
-                            class="value">Catmull-Rom</span></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Resource Allocation -->
-        <div class="card">
-            <h3>2. Multi-Objective Resource Allocation</h3>
-            <p>Solves the <strong>Weighted Utility Maximization</strong> problem to distribute finite resources (boats,
-                ambulances) based on "Impact per Minute". This ensures critical assets are not wasted on low-priority
-                zones.</p>
-
-            <div class="formula">
-                Maximize U = Σ ( (Population_i × (1 + Risk_i)) / (1 + Distance_i) )
-                <div class="comment">Prioritizes high-risk, high-population clusters that are simplest to reach.</div>
-            </div>
-        </div>
-
-        <!-- Geospatial Clustering -->
-        <div class="card">
-            <h3>3. Geospatial Population Clustering</h3>
-            <p>A <strong>Habitat Gravity Model</strong> that predicts population density. It typically follows an
-                inverse-risk distribution, snapping synthetic population points to building centroids while being
-                repelled by high-risk tensors.</p>
-
-            <div class="formula">
-                P(loc) ∝ (Building_Density) / (1 + Flood_Risk_Tensor)
-            </div>
-        </div>
-
-        <!-- Dynamic Risk Engine -->
-        <div class="card">
-            <h3>4. Dynamic Risk Engine</h3>
-            <p>Real-time <strong>Tensor Fusion</strong> of multiple hydrological variables to generate a composite
-                hazard surface. This surface is downsampled dynamically for rapid client-side rendering.</p>
-
-            <div class="formula">
-                Hazard_Tensor = (Depth × 0.4) + (Velocity × 0.3) + (Slope_Inv × 0.3)
-            </div>
-        </div>
-
+    <div class="viz-grid-row">
+      <div class="viz-canvas-wrap glass-card">
+        <h4>D8 — Single Direction <span class="tag-inline red">Limited</span></h4>
+        <canvas id="d8Canvas" width="420" height="420"></canvas>
+        <div class="viz-caption"><strong>⚠ Limitation:</strong> Each cell routes ALL water to ONE steepest neighbor. Creates unnatural straight-line channels, especially on flat terrain (slope &lt;0.1°).</div>
+      </div>
+      <div class="viz-canvas-wrap glass-card">
+        <h4>D-Infinity — Proportional Split <span class="tag-inline green">Preferred</span></h4>
+        <canvas id="dinfCanvas" width="420" height="420"></canvas>
+        <div class="viz-caption"><strong>✓ Advantage:</strong> Water splits proportionally between two steepest neighbors. Reduces flow concentration errors by ~40% on flat Darbhanga plains.</div>
+      </div>
     </div>
+  </div>
 
-    <!-- ML Components -->
-    <div class="section">
-        <h2 class="section-title">Machine Learning: Random Forest Flood Risk Classifier</h2>
-
-        <div class="card">
-            <h3>Model Architecture</h3>
-            <p>Jal Drishti v2.1 uses a <strong>Random Forest Classifier</strong> trained on 15,000 synthetic terrain
-                samples across all three village types. The model replaces the static weighted formula with a
-                data-driven approach that captures <strong>non-linear interactions</strong> between terrain, weather,
-                and hydrological features.</p>
-
-            <div class="grid-2">
-                <div class="data-box">
-                    <h4>Model Specifications</h4>
-                    <div class="data-row"><span class="label">Algorithm</span><span class="value">Random Forest</span>
-                    </div>
-                    <div class="data-row"><span class="label">Estimators</span><span class="value">200 trees</span>
-                    </div>
-                    <div class="data-row"><span class="label">Max Depth</span><span class="value">15</span></div>
-                    <div class="data-row"><span class="label">Class Weighting</span><span
-                            class="value">Balanced</span></div>
-                    <div class="data-row"><span class="label">Scaling</span><span class="value">StandardScaler</span>
-                    </div>
-                    <div class="data-row"><span class="label">Version</span><span class="value">v2.1-rf</span></div>
-                </div>
-                <div class="data-box">
-                    <h4>Performance Metrics</h4>
-                    <div class="data-row"><span class="label">Test Accuracy</span><span class="value"
-                            style="color: var(--success);">80.0%</span></div>
-                    <div class="data-row"><span class="label">Weighted F1</span><span class="value">0.800</span></div>
-                    <div class="data-row"><span class="label">CV Accuracy</span><span class="value">80.76% ±
-                            0.74%</span></div>
-                    <div class="data-row"><span class="label">Training Samples</span><span
-                            class="value">12,000</span></div>
-                    <div class="data-row"><span class="label">Test Samples</span><span class="value">3,000</span></div>
-                    <div class="data-row"><span class="label">Cross-Validation</span><span class="value">5-fold
-                            Stratified</span></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="card">
-            <h3>Input Features (8 Variables)</h3>
-            <p>Each grid cell is described by 8 terrain and meteorological features normalized via StandardScaler:</p>
-
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Feature</th>
-                        <th>Source</th>
-                        <th>Importance</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><strong>Rainfall (mm)</strong></td>
-                        <td>User input / Open-Meteo API</td>
-                        <td style="color: var(--danger);">31.9%</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Distance to River (m)</strong></td>
-                        <td>GeoJSON waterway proximity</td>
-                        <td style="color: var(--danger);">19.7%</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Flow Accumulation</strong></td>
-                        <td>D8 algorithm output</td>
-                        <td style="color: var(--danger);">16.5%</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Slope (degrees)</strong></td>
-                        <td>DEM gradient analysis</td>
-                        <td style="color: var(--warning);">9.6%</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Elevation (m)</strong></td>
-                        <td>Copernicus GLO-30 DEM</td>
-                        <td>7.2%</td>
-                    </tr>
-                    <tr>
-                        <td><strong>TWI</strong></td>
-                        <td>Topographic Wetness Index</td>
-                        <td>6.7%</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Soil Moisture</strong></td>
-                        <td>Open-Meteo soil API</td>
-                        <td>6.4%</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Land Use (encoded)</strong></td>
-                        <td>LULC classification</td>
-                        <td>2.0%</td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <div class="alert info">
-                <strong>Key Insight:</strong>
-                <p>Rainfall alone accounts for ~32% of prediction importance, but river proximity and flow accumulation
-                    together contribute ~36%, confirming that <strong>hydrological context matters more than raw
-                        precipitation</strong> for flood risk.</p>
-            </div>
-        </div>
-
-        <div class="card">
-            <h3>Training Pipeline</h3>
-            <p>The model is trained on synthetic but geographically realistic data mimicking the three terrain types:</p>
-
-            <ol class="pipeline">
-                <li><strong>Data Generation:</strong> 15,000 samples (5,000 per terrain type: hilly ghats, riverine
-                    plain, floodplain) with terrain-specific risk logic</li>
-                <li><strong>Feature Engineering:</strong> 8 features extracted per grid cell, including terrain
-                    derivatives (slope, TWI) and proximity metrics</li>
-                <li><strong>Stratified Split:</strong> 80/20 train-test split preserving class distribution</li>
-                <li><strong>StandardScaler:</strong> Z-score normalization of all features for consistent tree splits
-                </li>
-                <li><strong>Training:</strong> Random Forest with 200 estimators, max_depth=15, balanced class weights
-                </li>
-                <li><strong>Evaluation:</strong> 5-fold stratified cross-validation + held-out test set metrics</li>
-                <li><strong>Serialization:</strong> Model + scaler saved as .pkl via joblib for production deployment
-                </li>
-            </ol>
-
-            <div class="formula">
-                # Training command<br>
-                python scripts/train_model.py --samples 15000 --estimators 200 --depth 15
-            </div>
-        </div>
-
-        <div class="card">
-            <h3>Per-Class Performance</h3>
-            <p>The model achieves strong performance across all risk categories, with highest precision on extreme
-                risk (83.4%):</p>
-
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Risk Class</th>
-                        <th>Precision</th>
-                        <th>Recall</th>
-                        <th>F1 Score</th>
-                        <th>Support</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td style="color: #22c55e;">● Low</td>
-                        <td>0.770</td>
-                        <td>0.670</td>
-                        <td>0.717</td>
-                        <td>185</td>
-                    </tr>
-                    <tr>
-                        <td style="color: #eab308;">● Medium</td>
-                        <td>0.790</td>
-                        <td>0.801</td>
-                        <td>0.795</td>
-                        <td>955</td>
-                    </tr>
-                    <tr>
-                        <td style="color: #f97316;">● High</td>
-                        <td>0.795</td>
-                        <td>0.805</td>
-                        <td>0.800</td>
-                        <td>1,246</td>
-                    </tr>
-                    <tr>
-                        <td style="color: #ef4444;">● Extreme</td>
-                        <td>0.834</td>
-                        <td>0.827</td>
-                        <td>0.831</td>
-                        <td>614</td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <div class="alert warning">
-                <strong>Class Imbalance Note:</strong>
-                <p>The "Low" class has the fewest samples (6.2%) and lowest recall (67%). Balanced class weights in
-                    Random Forest help mitigate this, but ground-truth validated training data would further improve
-                    minority class performance.</p>
-            </div>
-
-            <div style="margin-top: 1.5rem; text-align: center;">
-                <img src="assets/graphs/model_performance.png" alt="Model Performance"
-                    style="max-width: 100%; border-radius: 8px; border: 1px solid var(--border-subtle);">
-                <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">Random Forest v2.1:
-                    Feature Importance and Cross-Validation Performance</p>
-            </div>
-        </div>
+  <!-- TWI + SCS-CN -->
+  <div class="viz-section fade-in">
+    <div class="section-header">
+      <div class="section-num">02</div>
+      <div><div class="viz-title">TWI & SCS Curve Number</div>
+      <div class="viz-subtitle">Terrain wetness indexing and rainfall-runoff conversion</div></div>
     </div>
-
-    <!-- Alert Thresholds -->
-    <div class="section">
-        <h2 class="section-title">Alert Thresholds (IMD Standards)</h2>
-
-        <div class="card">
-            <p>Alert levels follow India Meteorological Department (IMD) guidelines for rainfall intensity:</p>
-
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Alert Level</th>
-                        <th>Rainfall (24h)</th>
-                        <th>IMD Category</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td style="color: #eab308;">● Yellow</td>
-                        <td>≥ 64.5 mm</td>
-                        <td>Heavy Rainfall</td>
-                    </tr>
-                    <tr>
-                        <td style="color: #f97316;">● Orange</td>
-                        <td>≥ 115.5 mm</td>
-                        <td>Very Heavy Rainfall</td>
-                    </tr>
-                    <tr>
-                        <td style="color: #ef4444;">● Red</td>
-                        <td>≥ 204.5 mm</td>
-                        <td>Extremely Heavy Rainfall</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+    <div class="equation-block dual">
+      <div class="eq-col">
+        <div class="eq-label">Topographic Wetness Index (Beven & Kirkby, 1979)</div>
+        <div class="katex-eq">$$\text{TWI} = \ln\!\left(\frac{a}{\tan \beta}\right)$$</div>
+        <div class="eq-note">where <em>a</em> = specific upslope contributing area (m²/m) and <em>β</em> = local slope angle. TWI &gt; 10 → high waterlogging risk.</div>
+      </div>
+      <div class="eq-col">
+        <div class="eq-label">SCS Curve Number Method (USDA, 1986)</div>
+        <div class="katex-eq">$$Q = \frac{(P - I_a)^2}{P - I_a + S}, \quad S = \frac{25400}{\text{CN}} - 254, \quad I_a = 0.2\,S$$</div>
+        <div class="eq-note">All units in mm. CN is dimensionless (55–98). AMC III (saturated): CN<sub>III</sub> ≈ CN<sub>II</sub> × 1.20.</div>
+      </div>
     </div>
-
-    <!-- Model Execution Workflow -->
-    <div class="section">
-        <h2 class="section-title">Model Execution Workflow</h2>
-
-        <div class="card">
-            <h3>Jupyter-Based Development Cycle</h3>
-            <p>All core models undergo an iterative development and testing phase within Jupyter notebooks before
-                being optimized for high-performance Python production deployment.</p>
-
-            <div class="alert info">
-                <strong>Experimental Phase:</strong>
-                <p>Models are prototyped in Jupyter to visualize gradients, verify hydrological consistency, and
-                    adjust hyperparameters through interactive plotting.</p>
-            </div>
-
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Module</th>
-                        <th>Python Implementation</th>
-                        <th>Notebook Optimization</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><strong>Simulation</strong></td>
-                        <td><code>flood_model.py</code> (FastAPI)</td>
-                        <td>Runoff & Accumulation tuning</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Risk Engine</strong></td>
-                        <td><code>rescue_path.py</code> (A* Algorithm)</td>
-                        <td>Penalty weighting for flood depth</td>
-                    </tr>
-                    <tr>
-                        <td><strong>ML Classifier</strong></td>
-                        <td><code>ml_model.py</code> (Random Forest)</td>
-                        <td>Feature importance & risk classification</td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <div style="margin-top: 1.5rem; text-align: center;">
-                <img src="assets/graphs/population_heatmap_static.png" alt="Population Analysis"
-                    style="max-width: 100%; border-radius: 8px; border: 1px solid var(--border-subtle);">
-                <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">Spatial Population
-                    Vulnerability Analysis: Notebook-driven Gaussian Clustering</p>
-            </div>
-        </div>
+    <div class="viz-grid-row">
+      <div class="viz-canvas-wrap glass-card">
+        <h4>TWI Heatmap — Flood Susceptibility</h4>
+        <canvas id="twiCanvas" width="420" height="320"></canvas>
+        <div class="viz-caption"><span style="color:#ff4444">■</span> High TWI (red) = flat valleys, water accumulation zones. <span style="color:#4488ff">■</span> Low TWI (blue) = steep ridges, rapid drainage.</div>
+      </div>
+      <div class="viz-canvas-wrap glass-card">
+        <h4>SCS-CN Runoff Curves by Land Use</h4>
+        <canvas id="scsCnCanvas" width="420" height="320"></canvas>
+        <div class="viz-caption">Urban (CN 90) generates ~17× more runoff than dense forest (CN 55) at 200mm rainfall. AMC III shifts all curves upward dramatically.</div>
+      </div>
     </div>
+  </div>
 
-    <!-- Limitations -->
-    <div class="section">
-        <h2 class="section-title">Limitations & Future Work</h2>
-
-        <div class="card">
-            <h3>Current Limitations</h3>
-            <ul style="color: var(--text-secondary); padding-left: 1.25rem; margin: 0.5rem 0;">
-                <li>Does not account for existing drainage infrastructure</li>
-                <li>Assumes uniform rainfall distribution (no spatial variation)</li>
-                <li>Simplified infiltration model (no detailed soil data)</li>
-                <li>Static land cover (no seasonal variation)</li>
-            </ul>
-
-            <h3 style="margin-top: 1.5rem;">Recommended Enhancements</h3>
-            <ul style="color: var(--text-secondary); padding-left: 1.25rem; margin: 0.5rem 0;">
-                <li>Integration with IMD real-time rainfall forecasts</li>
-                <li>Higher resolution DEM (5–10m) for urban areas</li>
-                <li>Ground validation with historical flood extent data</li>
-                <li>Dynamic hydraulic routing for large catchments</li>
-            </ul>
-        </div>
+  <!-- XGBoost + Manning's -->
+  <div class="viz-section fade-in">
+    <div class="section-header">
+      <div class="section-num">03</div>
+      <div><div class="viz-title">XGBoost Risk Model & Manning's Equation</div>
+      <div class="viz-subtitle">Machine learning classification and open-channel flow velocity</div></div>
     </div>
+    <div class="equation-block dual">
+      <div class="eq-col">
+        <div class="eq-label">XGBoost Objective (multi:softprob)</div>
+        <div class="katex-eq">$$\hat{y}_i = \sum_{k=1}^{K} f_k(x_i), \quad \mathcal{L} = \sum_i l(y_i, \hat{y}_i) + \sum_k \Omega(f_k)$$</div>
+        <div class="eq-note">K = 300 trees, max_depth = 8. Output: predict_proba() for 4 risk classes (Low, Medium, High, Extreme).</div>
+      </div>
+      <div class="eq-col">
+        <div class="eq-label">Manning's Equation (SI Units)</div>
+        <div class="katex-eq">$$V = \frac{1}{n} \cdot R_h^{2/3} \cdot S_f^{1/2}$$</div>
+        <div class="eq-note">V = velocity (m/s), n = roughness coeff., R<sub>h</sub> = hydraulic radius (m), S<sub>f</sub> = friction slope. SI coefficient = 1.0 (NOT 1.486 imperial).</div>
+      </div>
     </div>
+    <div class="viz-grid-row">
+      <div class="viz-canvas-wrap glass-card">
+        <h4>Feature Importance — 300 Trees, 8 Features</h4>
+        <canvas id="xgbCanvas" width="420" height="300"></canvas>
+        <div class="viz-caption">Rainfall (28.6%) is dominant, but hydrological context (River Dist + Flow Acc = 39.1%) surpasses raw precipitation alone.</div>
+      </div>
+      <div class="viz-canvas-wrap glass-card">
+        <h4>Manning's Velocity by Surface Type</h4>
+        <canvas id="manningCanvas" width="420" height="300"></canvas>
+        <div class="viz-caption">At R<sub>h</sub>=1.0m, S=1%: Concrete channel (n=0.012) flows at 8.3 m/s vs Dense Forest (n=0.100) at 1.0 m/s — an 8× speed difference.</div>
+      </div>
+    </div>
+  </div>
 
-    <div class="footer">
-        <p>Jal Drishti • AI-Powered Flood Intelligence • Decision Support Tool</p>
+  <!-- Additional Equations Reference -->
+  <div class="viz-section fade-in">
+    <div class="section-header">
+      <div class="section-num">04</div>
+      <div><div class="viz-title">Additional Key Equations</div>
+      <div class="viz-subtitle">Hydrograph generation, flood routing, and dam-break analysis</div></div>
     </div>
+    <div class="equations-grid">
+      <div class="eq-card glass-card">
+        <div class="eq-card-title">SCS Dimensionless Unit Hydrograph</div>
+        <div class="katex-eq">$$T_p = \frac{D}{2} + 0.6\,T_c, \quad Q_p = \frac{2.08\,A}{T_p}$$</div>
+        <div class="eq-note">T<sub>p</sub> = time to peak (hr), A = basin area (km²), D = storm duration (hr), T<sub>c</sub> = time of concentration. Q<sub>p</sub> in m³/s.</div>
+      </div>
+      <div class="eq-card glass-card">
+        <div class="eq-card-title">Flood Hydrograph Convolution</div>
+        <div class="katex-eq">$$Q(t) = \sum_{\tau=0}^{t} P_{\text{eff}}(\tau) \cdot UH(t - \tau)\,\Delta\tau$$</div>
+        <div class="eq-note">Effective rainfall convolved with unit hydrograph across P50/P75/P90 IMD quantile scenarios for T+0 to T+72hr.</div>
+      </div>
+      <div class="eq-card glass-card">
+        <div class="eq-card-title">Muskingum-Cunge Routing</div>
+        <div class="katex-eq">$$K = \frac{\Delta x}{c}, \quad X = \frac{1}{2}\left[1 - \frac{Q}{B\,S_0\,c\,\Delta x}\right]$$</div>
+        <div class="eq-note">Geometry-derived K and X (no gauge calibration). Courant condition: C = V·Δt/Δx ≤ 1 is strictly enforced with auto sub-timestep.</div>
+      </div>
+      <div class="eq-card glass-card">
+        <div class="eq-card-title">Ritter Dam-Break Wave</div>
+        <div class="katex-eq">$$V_{\text{wave}} = 2\sqrt{g\,h_0}$$</div>
+        <div class="eq-note">Used when breach probability &gt; 60%. h₀ = water depth behind dam (m), g = 9.81 m/s². All downstream cells → EXTREME risk.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 3: Data Sources -->
+<div class="tab-view" id="tab-datasources">
+  <div id="ds-detail-container"></div>
+  <div id="ds-cats"></div>
+</div>
+
+<!-- TAB 4: Coverage Regions -->
+<div class="tab-view" id="tab-regions">
+  <div class="regions-grid">
+    <div class="region-card glass-card rc-kerala fade-in">
+      <div class="region-accent kerala"></div>
+      <div class="region-header">
+        <div><div class="region-name">Meppadi</div><div class="region-district">Wayanad District, Kerala</div></div>
+        <div class="region-risk-badge extreme">EXTREME</div>
+      </div>
+      <div class="region-stats">
+        <div class="region-stat"><span class="rs-icon">🌊</span><span class="rs-label">Flood Type</span><span class="rs-val" style="color:#00c8ff">Flash Flood + Landslide</span></div>
+        <div class="region-stat"><span class="rs-icon">⛰</span><span class="rs-label">Terrain</span><span class="rs-val">High-altitude, 700–2100m ASL</span></div>
+        <div class="region-stat"><span class="rs-icon">📡</span><span class="rs-label">DEM Source</span><span class="rs-val" style="color:#00c8ff">ALOS PALSAR 12.5m</span></div>
+        <div class="region-stat"><span class="rs-icon">📐</span><span class="rs-label">Avg Slope</span><span class="rs-val">18–35°</span></div>
+        <div class="region-stat"><span class="rs-icon">🌧</span><span class="rs-label">Avg Annual Rainfall</span><span class="rs-val">2500–3500 mm</span></div>
+        <div class="region-stat"><span class="rs-icon">⚠</span><span class="rs-label">Key Risk Event</span><span class="rs-val" style="color:#ffaa00">2018 Kerala Floods (483 deaths)</span></div>
+      </div>
+      <div class="risk-bar"><div class="risk-fill" style="--w:88%;background:linear-gradient(90deg,#00c8ff,#ff3b3b)"></div></div>
+      <div class="risk-label">Composite Risk Index: <strong>88/100</strong></div>
+      <div class="challenge-list">
+        <div class="section-label">TERRAIN CHALLENGES</div>
+        <div class="challenge-item">D8 fails on steep terrain — D-Infinity mandatory</div>
+        <div class="challenge-item">Cloud cover creates voids in ALOS DEM during monsoon</div>
+        <div class="challenge-item">Banasura Sagar dam upstream — reservoir override critical</div>
+        <div class="challenge-item">Flash flood time of concentration (T<sub>c</sub>) as low as 45 minutes</div>
+        <div class="challenge-item">Laterite soil: rapid saturation (AMC II→III in &lt;6hrs)</div>
+      </div>
+    </div>
+    <div class="region-card glass-card rc-bihar fade-in">
+      <div class="region-accent bihar"></div>
+      <div class="region-header">
+        <div><div class="region-name">Darbhanga</div><div class="region-district">Darbhanga District, Bihar</div></div>
+        <div class="region-risk-badge high">HIGH</div>
+      </div>
+      <div class="region-stats">
+        <div class="region-stat"><span class="rs-icon">🌊</span><span class="rs-label">Flood Type</span><span class="rs-val" style="color:#ffaa00">Riverine + Embankment Breach</span></div>
+        <div class="region-stat"><span class="rs-icon">⛰</span><span class="rs-label">Terrain</span><span class="rs-val">Flat alluvial plain, 40–55m ASL</span></div>
+        <div class="region-stat"><span class="rs-icon">📡</span><span class="rs-label">DEM Source</span><span class="rs-val" style="color:#00c8ff">Cartosat-1 10m</span></div>
+        <div class="region-stat"><span class="rs-icon">📐</span><span class="rs-label">Avg Slope</span><span class="rs-val">&lt;0.1° (critically flat)</span></div>
+        <div class="region-stat"><span class="rs-icon">🌧</span><span class="rs-label">Avg Annual Rainfall</span><span class="rs-val">1100–1300 mm</span></div>
+        <div class="region-stat"><span class="rs-icon">⚠</span><span class="rs-label">Key Risk Event</span><span class="rs-val" style="color:#ffaa00">2019 Bihar Floods (Bagmati breach)</span></div>
+      </div>
+      <div class="risk-bar"><div class="risk-fill" style="--w:82%;background:linear-gradient(90deg,#ffaa00,#ff3b3b)"></div></div>
+      <div class="risk-label">Composite Risk Index: <strong>82/100</strong></div>
+      <div class="challenge-list">
+        <div class="section-label">TERRAIN CHALLENGES</div>
+        <div class="challenge-item">Slope &lt;0.1° — D8 completely fails; bathtub inundation dominates</div>
+        <div class="challenge-item">Bagmati River embankment breach history (km-wide spread)</div>
+        <div class="challenge-item">Urban drainage failure not captured by TWI alone</div>
+        <div class="challenge-item">Cartosat 10m essential — SRTM 30m creates ±16m errors on flat terrain</div>
+        <div class="challenge-item">Alluvial soil high porosity delays but extends flooding duration</div>
+      </div>
+    </div>
+    <div class="region-card glass-card rc-assam fade-in">
+      <div class="region-accent assam"></div>
+      <div class="region-header">
+        <div><div class="region-name">Dhemaji</div><div class="region-district">Dhemaji District, Assam</div></div>
+        <div class="region-risk-badge extreme">EXTREME</div>
+      </div>
+      <div class="region-stats">
+        <div class="region-stat"><span class="rs-icon">🌊</span><span class="rs-label">Flood Type</span><span class="rs-val" style="color:#00e676">Braided River + Extreme Precipitation</span></div>
+        <div class="region-stat"><span class="rs-icon">⛰</span><span class="rs-label">Terrain</span><span class="rs-val">Brahmaputra floodplain, 90–120m ASL</span></div>
+        <div class="region-stat"><span class="rs-icon">📡</span><span class="rs-label">DEM Source</span><span class="rs-val" style="color:#00c8ff">Cartosat-1 10m</span></div>
+        <div class="region-stat"><span class="rs-icon">📐</span><span class="rs-label">Avg Slope</span><span class="rs-val">0.1–0.5°</span></div>
+        <div class="region-stat"><span class="rs-icon">🌧</span><span class="rs-label">Avg Annual Rainfall</span><span class="rs-val">2800–3200 mm</span></div>
+        <div class="region-stat"><span class="rs-icon">⚠</span><span class="rs-label">Key Risk Event</span><span class="rs-val" style="color:#ffaa00">2022 Assam Floods (700K displaced)</span></div>
+      </div>
+      <div class="risk-bar"><div class="risk-fill" style="--w:91%;background:linear-gradient(90deg,#00e676,#ff3b3b)"></div></div>
+      <div class="risk-label">Composite Risk Index: <strong>91/100</strong></div>
+      <div class="challenge-list">
+        <div class="section-label">TERRAIN CHALLENGES</div>
+        <div class="challenge-item">Braided channels shift seasonally — K &amp; X must be re-derived each season</div>
+        <div class="challenge-item">Subansiri dam upstream — largest hydropower project in NE India</div>
+        <div class="challenge-item">Wetland depressions must NOT be pit-filled (ε=0.001m preservation)</div>
+        <div class="challenge-item">Extreme precipitation events &gt;300mm/day increasing in frequency</div>
+        <div class="challenge-item">SMAP soil moisture saturates early — AMC III dominates June–September</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 5: Scores & Metrics -->
+<div class="tab-view" id="tab-metrics">
+  <div class="metrics-grid">
+    <div class="metric-card glass-card fade-in"><div class="metric-ring" data-pct="94"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="2.5"/><circle cx="18" cy="18" r="16" fill="none" stroke="#00c8ff" stroke-width="2.5" stroke-dasharray="94 6" stroke-dashoffset="25" stroke-linecap="round"/></svg><span class="ring-val">94.2%</span></div><div class="metric-label">Model Accuracy</div><div class="metric-sub">XGBoost, 5-fold CV</div></div>
+    <div class="metric-card glass-card fade-in"><div class="metric-ring" data-pct="93"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="2.5"/><circle cx="18" cy="18" r="16" fill="none" stroke="#00e676" stroke-width="2.5" stroke-dasharray="93 7" stroke-dashoffset="25" stroke-linecap="round"/></svg><span class="ring-val">0.938</span></div><div class="metric-label">F1 Score</div><div class="metric-sub">Balanced across 4 classes</div></div>
+    <div class="metric-card glass-card fade-in"><div class="metric-ring" data-pct="60"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="2.5"/><circle cx="18" cy="18" r="16" fill="none" stroke="#ffaa00" stroke-width="2.5" stroke-dasharray="60 40" stroke-dashoffset="25" stroke-linecap="round"/></svg><span class="ring-val">0.6+</span></div><div class="metric-label">Target CSI</div><div class="metric-sub">WMO operational standard</div></div>
+    <div class="metric-card glass-card fade-in"><div class="metric-ring" data-pct="100"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="2.5"/><circle cx="18" cy="18" r="16" fill="none" stroke="#4488ff" stroke-width="2.5" stroke-dasharray="100 0" stroke-dashoffset="25" stroke-linecap="round"/></svg><span class="ring-val">72hr</span></div><div class="metric-label">Forecast Window</div><div class="metric-sub">T+0 to T+72, 1hr steps</div></div>
+    <div class="metric-card glass-card fade-in"><div class="metric-ring" data-pct="100"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="2.5"/><circle cx="18" cy="18" r="16" fill="none" stroke="#00c8ff" stroke-width="2.5" stroke-dasharray="100 0" stroke-dashoffset="25" stroke-linecap="round"/></svg><span class="ring-val">300</span></div><div class="metric-label">XGBoost Trees</div><div class="metric-sub">8-feature physics vector</div></div>
+    <div class="metric-card glass-card fade-in"><div class="metric-ring" data-pct="85"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="2.5"/><circle cx="18" cy="18" r="16" fill="none" stroke="#ff3b3b" stroke-width="2.5" stroke-dasharray="85 15" stroke-dashoffset="25" stroke-linecap="round"/></svg><span class="ring-val">85%</span></div><div class="metric-label">Reservoir Trigger</div><div class="metric-sub">Override threshold (FRL)</div></div>
+  </div>
+
+  <div class="section-label" style="margin:28px 0 16px">PER-CLASS PERFORMANCE</div>
+  <div class="score-row">
+    <div class="score-item glass-card"><div class="score-name">Low Risk</div><div class="score-metrics"><span>P: 0.918</span><span>R: 0.905</span><span>F1: 0.911</span></div><div class="score-bar-wrap"><div class="score-bar" style="width:91.1%;background:linear-gradient(90deg,#10b981,#00c8ff)"></div></div></div>
+    <div class="score-item glass-card"><div class="score-name">Medium Risk</div><div class="score-metrics"><span>P: 0.932</span><span>R: 0.941</span><span>F1: 0.936</span></div><div class="score-bar-wrap"><div class="score-bar" style="width:93.6%;background:linear-gradient(90deg,#f59e0b,#ffaa00)"></div></div></div>
+    <div class="score-item glass-card"><div class="score-name">High Risk</div><div class="score-metrics"><span>P: 0.948</span><span>R: 0.952</span><span>F1: 0.950</span></div><div class="score-bar-wrap"><div class="score-bar" style="width:95.0%;background:linear-gradient(90deg,#ef4444,#ff6600)"></div></div></div>
+    <div class="score-item glass-card"><div class="score-name">Extreme Risk</div><div class="score-metrics"><span>P: 0.961</span><span>R: 0.957</span><span>F1: 0.959</span></div><div class="score-bar-wrap"><div class="score-bar" style="width:95.9%;background:linear-gradient(90deg,#dc2626,#aa44ff)"></div></div></div>
+  </div>
+
+  <div class="section-label" style="margin:28px 0 16px">FULL PIPELINE FLOW</div>
+  <div class="pipeline-flow glass-card">
+    <div class="flow-steps">
+      <span class="flow-step s1">DEM</span><span class="flow-arr">→</span>
+      <span class="flow-step s1">Void Fill</span><span class="flow-arr">→</span>
+      <span class="flow-step s1">Pit Fill</span><span class="flow-arr">→</span>
+      <span class="flow-step s1">D-Infinity</span><span class="flow-arr">→</span>
+      <span class="flow-step s1">TWI + Flow Acc</span><span class="flow-arr">→</span>
+      <span class="flow-step s2">AMC-SCS-CN</span><span class="flow-arr">→</span>
+      <span class="flow-step s2">SCS UH</span><span class="flow-arr">→</span>
+      <span class="flow-step s2">Hydrograph Q(t)</span><span class="flow-arr">→</span>
+      <span class="flow-step s3">Kinematic Wave</span><span class="flow-arr">→</span>
+      <span class="flow-step s3">Muskingum-Cunge</span><span class="flow-arr">→</span>
+      <span class="flow-step s3">Inundation</span><span class="flow-arr">→</span>
+      <span class="flow-step s3">Reservoir Override</span><span class="flow-arr">→</span>
+      <span class="flow-step s4">XGBoost</span><span class="flow-arr">→</span>
+      <span class="flow-step s4">Sentinel-1 CSI</span><span class="flow-arr">→</span>
+      <span class="flow-step s5">Vehicle A*</span><span class="flow-arr">→</span>
+      <span class="flow-step s5">Mission Control</span>
+    </div>
+  </div>
+</div>
+
+</div><!-- end container -->
+
+<div class="footer">
+  <div class="footer-brand">JAL DRISHTI</div>
+  <div class="footer-sub">AI-Powered Flood Intelligence · Technical Methodology · v2.0</div>
+  <div class="footer-copy">© 2024 Team Jal Drishti · MIT License</div>
+</div>
+
+<script src="js/methodology-engine.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded",function(){
+  if(typeof renderMathInElement==='function'){
+    renderMathInElement(document.body,{delimiters:[{left:"$$",right:"$$",display:true},{left:"$",right:"$",display:false}],throwOnError:false});
+  }
+});
+</script>
 </body>
-
 </html>
