@@ -40,6 +40,7 @@ if assets_dir.exists():
 # =============================================
 
 @app.get("/", include_in_schema=False)
+@app.get("/index.html", include_in_schema=False)
 async def serve_dashboard():
     """Serve the main dashboard page."""
     return FileResponse(DASHBOARD_DIR / "index.html")
